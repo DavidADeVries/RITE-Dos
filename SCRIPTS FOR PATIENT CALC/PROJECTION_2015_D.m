@@ -74,7 +74,7 @@ CTinterp1(:,1)=-14999:15000; % these 4 lines interpolate the CT machine calibrat
 CTinterp2(:,1)=interp1(CTcalib(:,1),CTcalib(:,2),CTinterp1(:,1),'linear','extrap');
 
 % IV. OTHER PARAMETERS
-NumPnt=333
+NumPnt=333;
 %round(100/thick)+1; % MAKE SURE IT IS AN ODD NUMBER % whyyy??
 % this is the number of points in which the source-to-detector rayline is broken into.
 % at every point, the electron density is estimated from the CT number.
@@ -124,8 +124,8 @@ vector_DcmOrig2CTcorner
 vector_CTcorner2DcmOrig=-vector_DcmOrig2CTcorner
 
 % VECTOR: FROM CTdata's (1,1,1)) TO BEAM ISO 
-vector_CTcorner2Iso=vector_CTcorner2DcmOrig+vector_DcmOrig2Iso
-vector_CTcorner2Iso=transpose(vector_CTcorner2Iso)
+vector_CTcorner2Iso=vector_CTcorner2DcmOrig+vector_DcmOrig2Iso;
+vector_CTcorner2Iso=transpose(vector_CTcorner2Iso);
 
 
 

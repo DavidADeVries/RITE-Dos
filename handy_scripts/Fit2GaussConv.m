@@ -3,8 +3,8 @@ function [estimates,ConvRescaleFactor,SumSquares] = Fit2GaussConv(ydata, ref, SD
 start_point = rand(1,4);
 model = @ConvSumGauss;
 options = optimset('MaxFunEvals',10000,'MaxIter',10000);
-estimates = fminsearchbnd(model, start_point, [0.01 0.01 0.01 0.01], [],options);
-%estimates = fminsearch(model, start_point, options);
+%estimates = fminsearchbnd(model, start_point, [0 0 0 0], [],options);
+estimates = fminsearch(model, start_point, options);
 estimates = estimates/sum(estimates);
 % ConvSumGauss accepts curve parameters as inputs, and outputs sse,
 % the sum of squares error for conv(EPIDprofile,(w1*g1+...+w4g4),'same'),

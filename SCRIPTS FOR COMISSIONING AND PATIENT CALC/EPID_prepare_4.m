@@ -1,5 +1,4 @@
-function[image_sum,flood_00cm,flood_20cm,nCINEfiles,CAX,goodimages_numbers,badimages_numbers,example_cine]=EPID_prepare_4(EPID_folder,FF_used,FF_new)
-
+function[image_sum,nCINEfiles,CAX,goodimages_numbers,badimages_numbers,example_cine]=EPID_prepare_4(EPID_folder)
 % This script takes a directory of EPID cine images, and:
 % -eliminates the first 2 cines, which are always (unit 9, all energies, all
 % resolutions) 'bad' (mean CAX value very different from subsequent ones)
@@ -13,15 +12,6 @@ function[image_sum,flood_00cm,flood_20cm,nCINEfiles,CAX,goodimages_numbers,badim
 
 range=1;
 
-
-flood_00cm=dicomread(FF_used);
-flood_20cm=dicomread(FF_new);
-
-flood_00cm=double(flood_00cm);
-flood_00cm_mean=mean(mean(flood_00cm(:)));
-
-flood_20cm=double(flood_20cm);
-flood_20cm_mean=mean(mean(flood_20cm(:)));
 
 % -------------------------------------------------------------------------
 % UNCOMMENT IF YOU WANT IMAGES AND PROFILES OF THE FLOOD FIELD IMAGES
@@ -49,13 +39,6 @@ flood_20cm_mean=mean(mean(flood_20cm(:)));
 % end
 % title('New flood field profiles (20cm)'); legend('cross-plane','in-plane','location','north')
 % -------------------------------------------------------------------------
-
-if size(flood_00cm,2)==512
-    image_sum=zeros(384,512);
-elseif size(flood_00cm,2)==1024
-    image_sum=zeros(768,1024);
-end
-
 cd(EPID_folder);
 CINEfilenames1=dir('SPI*.dcm');  %Make List of dicom filenames in folder
 CINEfilenames2=dir('RI*.dcm'); 
@@ -67,20 +50,22 @@ for i=1:size(CINEfilenames,1)
     b=dicomread(name);
     b=double(b);
     CAX(i)=mean(mean(b(189:196,253:268)));
+    
 end
+image_sum = zeros(size(b));
 
 % here we want to throw out the first 2 cines, always. If have only 4 cines,
 % I'll keep the next 1 or 2. If I have more than 4, I'll throw out also all the
 % "bad" ones
 
 if nCINEfiles==1
-    goodimages_indeces=[1]
+    goodimages_indeces=[1];
 elseif nCINEfiles==2
-    goodimages_indeces=[0 1]
+    goodimages_indeces=[0 1];
 elseif nCINEfiles==3
-    goodimages_indeces=[0 0 1]    
+    goodimages_indeces=[0 0 1];    
 elseif nCINEfiles==4
-    goodimages_indeces=[0 0 1 1]
+    goodimages_indeces=[0 0 1 1];
 else
     % Find images that are "bad" i.e. have mean CAX that is outlier. In EPID cine
     % imaging this is often the case for the first 2-8 images, depending on imaging
@@ -97,12 +82,7 @@ badimages_numbers=find(~goodimages_indeces);
 % legend('accepted','rejected','location','southeast')
 % title('Mean CAX value for cine images of beam')
 
-if size(flood_00cm,2)==512
-    sum=zeros(384,512);
-elseif size(flood_00cm,2)==1024
-    sum=zeros(768,1024);
-end
-
+sum = zeros(size(b));
 for i=goodimages_numbers
     name=CINEfilenames(i).name;
     b=dicomread(name);
@@ -126,12 +106,6 @@ for n=1:nCINEfiles
     end
 
             if n==1
-                if size(image_asis,2)==512 && size(flood_20cm,2)==1024
-                    flood_20cm=imresize(flood_20cm,0.50);
-                end
-                if size(image_asis,2)~=size(flood_00cm,2)
-                    sprintf('Flood field image has different resolution than cine EPID image')
-                end
                 if size(image_asis,2)~=1024
                     sprintf('Image is FULL RES (1024x768)');
                 elseif size(image_asis,2)~=512
@@ -174,7 +148,6 @@ for n=1:nCINEfiles
 
         % REMOVE FLOOD FIELD CORRECTION FROM EACH EPID IMAGE TO OBTAIN "RAW" IMAGE
         % (NOTE: DARK FIELD CORRECTION REMAINS)
-        image_rescaled_FFcorrOFF=(image_rescaled.*flood_00cm)/flood_00cm_mean;
             if n==round(nCINEfiles/2)
                 if size(image_asis,2)==512
                 %figure; imagesc(image_rescaled_FFcorrOFF); axis equal; axis tight; title('Rescaled and FF correction removed'); colorbar; colormap('bone')
@@ -184,7 +157,6 @@ for n=1:nCINEfiles
 
         % ADD A new FLOOD FIELD CORRECTION
         % (NOTE: THIS flood_new IS ACQUIRED AT a certain DEPTH in SW)
-        image_rescaled_FFcorrOFF_FFNEWcorrON=(image_rescaled_FFcorrOFF./flood_20cm)*flood_20cm_mean;
             if n==round(nCINEfiles/2)
                 if size(image_asis,2)==512
                 %figure; imagesc(image_rescaled_FFcorrOFF_FFNEWcorrON); axis equal; axis tight; title('New FF correction added'); colorbar; colormap('bone')
@@ -193,7 +165,7 @@ for n=1:nCINEfiles
             end
 
         % CONCATENATE THIS IMAGE INTO THE IMAGE SUM    
-        image_sum = image_sum + image_rescaled_FFcorrOFF_FFNEWcorrON;
+        image_sum = image_sum + image_rescaled;
 
     
 
@@ -214,3 +186,4 @@ end
 % %figure; plot(-14.16284:0.073916228:14.16284,ProfDiagNeg_image_sum,-14.16284:0.073916228:14.16284,ProfDiagPos_image_sum);
 % legend('- profile','+ profile','location','South'); title('Pre-processed diagonal profiles (a.u.)'); xlabel('Distance from isocenter (cm)');
 clear x y cx cy ProfDiagNeg_image_sum ProfDiagPos_image_sum 
+cd ..

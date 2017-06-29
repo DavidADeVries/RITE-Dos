@@ -1,0 +1,1 @@
+these are gaussian weight for U9 06X

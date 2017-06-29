@@ -7,25 +7,25 @@ sprintf('Convolution 2D shape correction script started')
 
 eclipse_profile=eclipse(192,:);
 [value,index]=findpeaks(eclipse_profile);
-radius1=abs(min(index)-size(eclipse_profile,2)/2)
-radius2=abs(max(index)-(size(eclipse_profile,2)/2+1))
+radius1=abs(min(index)-size(eclipse_profile,2)/2);
+radius2=abs(max(index)-(size(eclipse_profile,2)/2+1));
 
 if max(size(index))==1
-    index(2)=index(1)
+    index(2)=index(1);
 end
 
-scalar1=eclipse_profile(index(1))/DOSE_CONV(192,index(1))
-scalar2=eclipse_profile(index(2))/DOSE_CONV(192,index(2))
+scalar1=eclipse_profile(index(1))/DOSE_CONV(192,index(1));
+scalar2=eclipse_profile(index(2))/DOSE_CONV(192,index(2));
 
 eclipse_profile=eclipse(:,256);
 [value,index]=findpeaks(eclipse_profile);
-radius3=abs(min(index)-size(eclipse_profile,1)/2)
-radius4=abs(max(index)-(size(eclipse_profile,1)/2+1))
+radius3=abs(min(index)-size(eclipse_profile,1)/2);
+radius4=abs(max(index)-(size(eclipse_profile,1)/2+1));
 
-scalar3=eclipse_profile(index(1))/DOSE_CONV(index(1),256)
-scalar4=eclipse_profile(index(2))/DOSE_CONV(index(2),256)
+scalar3=eclipse_profile(index(1))/DOSE_CONV(index(1),256);
+scalar4=eclipse_profile(index(2))/DOSE_CONV(index(2),256);
 
-scalar=mean([scalar1 scalar2 scalar3 scalar4])
+scalar=mean([scalar1 scalar2 scalar3 scalar4]);
 
 DOSE_CONV_2=DOSE_CONV*scalar;
 
@@ -35,7 +35,7 @@ radius = (l/2-1)/0.052; % in pixels
 
 imageSizeX = 512;
 imageSizeY = 384;
-[columnsInImage rowsInImage] = meshgrid(1:imageSizeX, 1:imageSizeY);
+[columnsInImage, rowsInImage] = meshgrid(1:imageSizeX, 1:imageSizeY);
 % Next create the circle in the image.
 centerX = 256;
 centerY = 192;
@@ -69,6 +69,6 @@ scaled_horns_corr=horns_corr/scalar;
 % horns_corr=horns_corr/mean(mean(horns_corr(190:195,254:259)));
 % figure; imagesc(horns_corr); axis equal; axis tight; colorbar; set(gca,'Clim', [.97 1.03]);
 
-eval(['cd(''C:\Documents and Settings\stefanopeca\My Documents\EPID_dosimetry_RESEARCH\2014-2015\RITE Dos 2015\',UnitStr,'\',ResolutionStr,'\Gaussian_CAX_corr\',EnergyStr,' '');']);
+eval(['cd(''C:\Documents and Settings\stefanopeca\My Documents\EPID_dosimetry_RESEARCH\2014-2015\RITE Dos 2015\',UnitStr,'\Horn_corr\',EnergyStr,' '');']);
 eval(['save ghc_l',l_string,'w',w_string,' scalar horns_corr scaled_horns_corr;']);
 cd(working_dir);

@@ -3,10 +3,10 @@ close all; clc
 clear MU_comm num_im interp delta lost_MU num_images corr_factor_frame_loss
 
 % 0. Temp
-MU=100
-UnitStr='Unit09'
-EnergyStr='06X'
-nCINEfiles=10
+MU=100;
+UnitStr='Unit09';
+EnergyStr='06X';
+nCINEfiles=10;
 
 % 1. DATA
 
@@ -36,16 +36,17 @@ end
 figure; plot(MU_comm,num_im,'o--'); xlabel('MU'); ylabel('num of images');
 
 interp(:,1)=ceil(interp1(num_im,MU_comm,[1:max(num_im)]'));
-interp(:,2)=[1:max(num_im)]'
+interp(:,2)=1:max(num_im)';
 
+delta = zeros(1,size(interp,1)-1);
 for n=1:size(interp,1)-1
     delta(n)=interp(n+1,1)-interp(n,1);
 end
-delta=mean(delta)
+delta=mean(delta);
 
-lost_MU=MU-max(interp(interp(:,1)<=MU))
+lost_MU=MU-max(interp(interp(:,1)<=MU));
 
-num_images=floor(interp1(MU_comm,num_im,MU))
+num_images=floor(interp1(MU_comm,num_im,MU));
 
 if num_images~=nCINEfiles
     sprintf('WARNING: frame drop correction is likely inaccurate (predicted image count does not agree with actual number of cine images)')
@@ -53,7 +54,7 @@ elseif num_images==nCINEfiles
     sprintf('Frame drop correction agrees with number of cine images')
 end
 
-corr_factor_frame_loss=1+lost_MU/delta/num_images
+corr_factor_frame_loss=1+lost_MU/delta/num_images;
 
 clear MU_comm num_im interp delta lost_MU num_images 
 
