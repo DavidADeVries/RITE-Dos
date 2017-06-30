@@ -1,8 +1,8 @@
-function [ BSCs ] = makeBSC( EPIDs, names )
+function [ BSCs ] = makeBSC( EPIDs )
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
 BSCs = zeros(size(EPIDs));
-for i=1:length(EPIDs)
+for i=1:size(EPIDs,3)
     flipped = flipud(EPIDs(:,:,i));
     symmetric = zeros(384,512);
     symmetric(1:192,:)=flipped(1:192,:);
@@ -16,11 +16,12 @@ for i=1:length(EPIDs)
     mask_smaller = floor(imfilter(mask,filtermask));
     
     BSCs(:,:,i) = EPIDs(:,:,i)./symmetric.*mask_smaller;
-    BSCs(BSCs(:,:,i)==0,i)=1;
+    figure; imagesc(BSCs(:,:,i)); colorbar; set(gca, 'clim' ,[0.95 1.05]); title('weighting matrix')
 %     
 %     name = names(:,:,i);
 %     w_string = name(1:3);
 %     l_string = name(4:end);
 end
+BSCs(BSCs==0) = 1;
 end
 

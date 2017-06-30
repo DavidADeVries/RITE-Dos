@@ -3,7 +3,7 @@ function [ imagesum, nCINE,CAX,goodimg,badimg,CINEex ] = EPIDprep( EPIDdir )
 % together, while also eliminating outliers.
 
 % Getting the DICOM files
-CINEnames = [dir([EPIDdir '\*.dcm'])];
+CINEnames = dir([EPIDdir '\*.dcm']);
 CINEnames = {CINEnames.name};
 
 nCINE = length(CINEnames);
