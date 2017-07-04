@@ -1,4 +1,4 @@
-function [ w_cr_avg, w_in_avg, HCM ] = makeGaussianCorr( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
+function [ w_cr_avg, w_in_avg, ConvRescaleFactors_cross, ConvRescaleFactors_in, HCM ] = makeGaussianCorr( ECLIPSEs, BSCEPIDsF, TMRratio, FmatInt,fmatInt )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 SD1 = 1.7;
@@ -18,20 +18,20 @@ g4 = gauss_distribution(x,m,SD4/.523);
 
 %Should horns be BSCed? If so, do this outside and pass EPIDs in after
 %having been corrected.
-HCM = zeros(size(EPIDsF));
-% ConvRescaleFactors_cross = zeros(1,size(EPIDsF,3));
-% ConvRescaleFactors_in = zeros(1,size(EPIDsF,3));
+HCM = zeros(size(BSCEPIDsF));
+ConvRescaleFactors_cross = zeros(1,size(BSCEPIDsF,3));
+ConvRescaleFactors_in = zeros(1,size(BSCEPIDsF,3));
 
-for i=1:size(EPIDsF,3)
+for i=1:size(BSCEPIDsF,3)
     % What I'll do is use the w_s and l_s to index properly rather than
     % have many different ones. I guess. Something like have a map from its
     % position in the w_s and l_s arrays to the third dimension of the BSC
     % matrix. May or may not be more efficient and useful.
     
     %% Adjusts the EPIDs for left-right and superior-inferior displacement.
-    epid_max = mean2(EPIDsF(189:196,253:260,i));
-    epid_min = mean2(EPIDsF(1:8,1:8,i));
-    mask = (EPIDsF(:,:,i) > abs(epid_max+epid_min)/4);
+    epid_max = mean2(BSCEPIDsF(189:196,253:260,i));
+    epid_min = mean2(BSCEPIDsF(1:8,1:8,i));
+    mask = (BSCEPIDsF(:,:,i) > abs(epid_max+epid_min)/4);
     
     eclipse_max = mean2(ECLIPSEs(189:196,253:260,i));
     mask_eclipse = (ECLIPSEs(:,:,i)>abs(eclipse_max)/2);
@@ -48,7 +48,7 @@ for i=1:size(EPIDsF,3)
     % EPID_sag_cm=[epidsagSImagn*.05 epidsagLRmagn*.05];
     
     
-    shiftEPIDsF = circshift(EPIDsF(:,:,i), [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);
+    shiftEPIDsF = circshift(BSCEPIDsF(:,:,i), [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);
     assignin('base','shiftEPIDsF',shiftEPIDsF)
     
     
@@ -96,10 +96,10 @@ for i=1:size(EPIDsF,3)
     slope=diff(tps_profile); [~,b]=max(slope); [~,d]=min(slope);
     xlim([b-30 d+30]); ylim([0.8*max(tps_profile) 1.1*max(tps_profile)])
     
-%     ConvRescaleFactors_cross(i) = ConvRescaleFactor_cross;
-%     ConvRescaleFactors_in(i) = ConvRescaleFactor_in;
+    ConvRescaleFactors_cross(i) = ConvRescaleFactor_cross;
+    ConvRescaleFactors_in(i) = ConvRescaleFactor_in;
     
-%     DoseConv = getDoseConv(shiftEPIDsF,gsumcr,gsumin,TMRratio,FmatInt,fmatInt);
-%     HCM(:,:,i) = makeGHC(DoseConv, tps_profile);
+    DoseConv = getDoseConv(shiftBSCEPIDsF(:,:,i),gsumcr,gsumin,TMRratio,FmatInt,fmatInt);
+    HCM(:,:,i) = makeGHC(DoseConv, e);
 end
 

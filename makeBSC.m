@@ -14,9 +14,10 @@ for i=1:size(EPIDs,3)
     
     filtermask = fspecial('gaussian',[15 15],5);
     mask_smaller = floor(imfilter(mask,filtermask));
-    
-    BSCs(:,:,i) = EPIDs(:,:,i)./symmetric.*mask_smaller;
-    figure; imagesc(BSCs(:,:,i)); colorbar; set(gca, 'clim' ,[0.95 1.05]); title('weighting matrix')
+    BSC = EPIDs(:,:,i)./symmetric.*mask_smaller;
+    BSC(BSC==0) = 1;
+    BSCs(:,:,i) = BSC;
+    figure; imagesc(BSC); colorbar; set(gca, 'clim' ,[0.95 1.05]); title('weighting matrix')
 %     
 %     name = names(:,:,i);
 %     w_string = name(1:3);
