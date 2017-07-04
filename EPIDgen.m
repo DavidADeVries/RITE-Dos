@@ -8,7 +8,7 @@ ECLIPSEs = zeros(384,512,length(TPSnames));
 TPSinfo = dicominfo([TPSdir '\' TPSnames(1).name]);
 DoseScale = TPSinfo.DoseGridScaling;
 for i=1:length(TPSnames)
-    ECLIPSEs(:,:,i) = 100*DoseScale*dicomread([TPSdir '\' TPSnames(i).name]);
+    ECLIPSEs(:,:,i) = 100*DoseScale*double(dicomread([TPSdir '\' TPSnames(i).name]));
 end
 disp('done TPS')
 Fnames = dir([Fdir '\w*']);
