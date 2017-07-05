@@ -1,4 +1,4 @@
-function [ w_cr_avg, w_in_avg, DoseConvs ] = makeGaussianCorr( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
+function [ w_cr_avg, w_in_avg, HCM, DoseConvs ] = makeGaussianCorr( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 SD1 = 1.7;
@@ -18,7 +18,7 @@ g4 = gauss_distribution(x,m,SD4/.523);
 
 %Should horns be BSCed? If so, do this outside and pass EPIDs in after
 %having been corrected.
-% HCM = zeros(size(EPIDsF));
+HCM = zeros(size(EPIDsF));
 DoseConvs = zeros(size(EPIDsF));
 % ConvRescaleFactors_cross = zeros(1,size(EPIDsF,3));
 % ConvRescaleFactors_in = zeros(1,size(EPIDsF,3));
@@ -30,13 +30,16 @@ for i=1:size(EPIDsF,3)
     % matrix. May or may not be more efficient and useful.
     l_s=5:5:20;
     w_s=5:5:40;
+    d_s=-10:5:10;
     l=l_s(mod(i-1,length(l_s))+1);
     w=w_s(floor((i-1)/length(l_s))+1);
+    d=d_s(floor((i-1)/length(l_s))+1);
     
     WED_source2epid=w*ones(384,512);
     Fwindex = round((WED_source2epid-ones(384,512)*(w_s(1)))/0.1)+1;
     Flindex = round((l-l_s(1))/0.1)+1;
     
+    fdindex = 
     F_map = FmatInt(Fwindex,Flindex);
     F_map = reshape(F_map,384,512);
     fmap = ones(384,512);
@@ -126,16 +129,16 @@ for i=1:size(EPIDsF,3)
 %     figure()
 %     imagesc((EPIDsF(:,:,i)./F_map-ECLIPSEs(:,:,i))./ECLIPSEs(:,:,i)*100)
     
-%     HCM(:,:,i) = makeGHC(DoseConv, ECLIPSEs(:,:,i), l);
-%     
-%     tps_profile=ECLIPSEs(192,:,i);
-%     doseconv_profile = DoseConv(192,:).*HCM(192,:,i);
-%     figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(192,:,i)./F_map(192,:));
-%     title('With HCM')
-%     doseconv_profile = DoseConv(:,256).*HCM(:,256,i);
-%     tps_profile=ECLIPSEs(:,256,i);
-%     figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(:,256,i)./F_map(:,256));
-%     title('With HCM')
+    HCM(:,:,i) = makeGHC(DoseConv, ECLIPSEs(:,:,i), l);
+    
+    tps_profile=ECLIPSEs(192,:,i);
+    doseconv_profile = DoseConv(192,:).*HCM(192,:,i);
+    figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(192,:,i)./F_map(192,:));
+    title('With HCM')
+    doseconv_profile = DoseConv(:,256).*HCM(:,256,i);
+    tps_profile=ECLIPSEs(:,256,i);
+    figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(:,256,i)./F_map(:,256));
+    title('With HCM')
     
 end
 

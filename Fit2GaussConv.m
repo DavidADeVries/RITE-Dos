@@ -4,9 +4,9 @@ start_point = rand(1,4);
 model = @ConvSumGauss;
 options = optimset('MaxFunEvals',10000,'MaxIter',10000);
 
-%estimates = fminsearchbnd(model, start_point, [0 0 0 0], [],options); estimates = estimates/sum(estimates);
+estimates = fminsearchbnd(model, start_point, [0 0 0 0], [],options); estimates = estimates/sum(estimates);
 
-estimates = fminsearch(model, start_point, options);
+% estimates = fminsearch(model, start_point, options);
 
 % ConvSumGauss accepts curve parameters as inputs, and outputs sse,
 % the sum of squares error for conv(EPIDprofile,(w1*g1+...+w4g4),'same'),
@@ -60,6 +60,6 @@ estimates = fminsearch(model, start_point, options);
          SumSquares=sse;
 
     end
- sprintf('You have minimized [Conv(EPID,SumGaussians)-TPS_Dose] between these two sets of pixel indeces:')
- display([a b c d])
+ %sprintf('You have minimized [Conv(EPID,SumGaussians)-TPS_Dose] between these two sets of pixel indeces:')
+ %display([a b c d])
 end

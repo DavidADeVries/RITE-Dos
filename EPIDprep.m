@@ -11,7 +11,7 @@ nCINE = length(CINEnames);
 % Determining the resolution of the images and then finding the central
 % axis mean signal.
 CAX=zeros(1,nCINE);
-first=double(dicomread(CINEnames{1}));
+first=double(dicomread([EPIDdir '\' CINEnames{1}]));
 if ~isequal(size(first),[384,512])
     rsz=true;
     first = imresize(first, [384,512]);
@@ -25,9 +25,9 @@ CAX(1) = mean2(ims(189:196,253:260,1));
 % Resizing the 384x512 if necessary and finding CAX mean.
 for i=2:nCINE
     if rsz
-        ims(:,:,i)=imresize(double(dicomread(CINEnames{i})),[384,512]);    
+        ims(:,:,i)=imresize(double(dicomread([EPIDdir '\' CINEnames{i}])),[384,512]);    
     else
-        ims(:,:,i)=double(dicomread(CINEnames{i}));
+        ims(:,:,i)=double(dicomread([EPIDdir '\' CINEnames{i}]));
     end
     CAX(i) = mean2(ims(189:196,253:260,i));
 end
