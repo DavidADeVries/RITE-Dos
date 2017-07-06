@@ -1,0 +1,29 @@
+function [  ] = RITEDosCommission(  )
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes here
+TPSdir = uigetdir();
+Fdir = uigetdir();
+fdir = uigetdir();
+[TPRname, path] = uigetfile();
+
+TPR = load([path TPRname]);
+%To get rid of NaNs
+TPR = TPR(~isnan(TPR));
+[ECLIPSEs, EPIDsF, EPIDsf] = EPIDgen(TPSdir,Fdir,fdir);
+
+FMATRIX = makeBigF(ECLIPSEs, TPSdir, EPIDsF);
+fmat = makeSmallf(fdir,EPIDsf);
+
+l_s = 5:5:20;
+w_s = 5:5:40;
+d_s = -10:5:10;
+TPRdepth = [0:0.5:20 21:30];
+TPRfields = 5:20;
+
+[FmatInt,fmatInt,TPRint] = InterpMatrices(FMATRIX, fmat, w_s, l_s, d_s, TPR, TPRdepth, TPRfields);
+
+[ws_in, ws_cr, DoseConvs] = makeGaussianCorr(ECLIPSEs, EPIDsF, TPRint, FmatInt,fmatInt);
+
+
+end
+

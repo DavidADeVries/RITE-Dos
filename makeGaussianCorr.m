@@ -1,4 +1,4 @@
-function [ w_cr_avg, w_in_avg, DoseConvs ] = makeGaussianCorr( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
+function [ ws_cr, ws_in, DoseConvs ] = makeGaussianCorr( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 SD1 = 1.7;
@@ -22,6 +22,8 @@ g4 = gauss_distribution(x,m,SD4/.523);
 DoseConvs = zeros(size(EPIDsF));
 % ConvRescaleFactors_cross = zeros(1,size(EPIDsF,3));
 % ConvRescaleFactors_in = zeros(1,size(EPIDsF,3));
+ws_cr = zeros(4,size(EPIDsF,3));
+ws_in = zeros(4,size(EPIDsF,3));
 
 for i=1:size(EPIDsF,3)
     % What I'll do is use the w_s and l_s to index properly rather than
@@ -72,7 +74,8 @@ for i=1:size(EPIDsF,3)
     w3=w_in(3); %weight of Gaussian 3
     w4=w_in(4); %weight of Gaussian 3
 
-    w_in_avg=[w1 w2 w3 w4];
+    w_in=[w1 w2 w3 w4];
+    ws_in(:,i) = w_in;
     
     gsumin=(w1*g1+w2*g2+w3*g3+w4*g4)/trapz(w1*g1+w2*g2+w3*g3+w4*g4); 
     tps_profile=ECLIPSEs(:,256,i);
@@ -95,9 +98,11 @@ for i=1:size(EPIDsF,3)
     w3=w_cross(3); %weight of Gaussian 3
     w4=w_cross(4); %weight of Gaussian 4
 
-    w_cr_avg=[w1 w2 w3 w4];
+    w_cr=[w1 w2 w3 w4];
+    ws_cr(:,i) = w_cr;
     
     gsumcr=(w1*g1+w2*g2+w3*g3+w4*g4)/trapz(w1*g1+w2*g2+w3*g3+w4*g4);
+    assignin('base','gsumcr',gsumcr)
     %figure; plot(x,g1,x,g2,x,g3,x,g4,x,gsum); legend('Gaussian 1','Gaussian 2','Gaussian 3','Gaussian 4','Sum'); xlim([400 600]); %ylim([0 0.1])
     tps_profile=ECLIPSEs(192,:,i);
     epid_profile=shiftEPIDsF(192,:);

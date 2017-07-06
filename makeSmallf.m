@@ -7,14 +7,13 @@ function [ fmatrix ] = makeSmallf( fdir, EPIDsf )
 fnames = dir([fdir '\l*']);
 fnames2 = {fnames.name};
 fnames2 = cell2mat(fnames2');
-assignin('base','fnames',fnames)
-assignin('base','fnames2',fnames2)
+
 l_s = unique(str2num(fnames2(:,2:3))); %#ok<*ST2NM>
 d_s = unique(str2num(fnames2(:,5:7)));
 
 CAXepids = mean(mean(EPIDsf(189:196,253:260,:)));
 CAXepids = squeeze(permute(CAXepids, [3 1 2]));
-assignin('base','CAXepids2',CAXepids);
+
 fmatrix = zeros(length(d_s),length(l_s));
 
 

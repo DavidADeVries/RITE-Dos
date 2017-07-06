@@ -14,9 +14,9 @@ disp('done TPS')
 Fnames = dir([Fdir '\w*']);
 assignin('base','names',Fnames)
 EPIDsF = zeros(384,512,length(Fnames));
-for i=1:length(Fnames)
-    disp(['F: ' num2str(i)]);
-    EPIDsF(:,:,i) = EPIDprep([Fdir '\' Fnames(i).name]);
+for j=1:length(Fnames)
+    disp(['F: ' num2str(j)]);
+    EPIDsF(:,:,j) = EPIDprep([Fdir '\' Fnames(j).name]);
 end
 
 fnames = dir([fdir '\l*']);
@@ -24,9 +24,9 @@ fnames = {fnames.name};
 fnames = cell2mat(fnames');
 fnames = fdirsort(fnames);
 EPIDsf = zeros(384,512,length(fnames));
-for i=1:length(fnames)
-    disp(['f: ' num2str(i)]);
-    EPIDsf(:,:,i) = EPIDprep([fdir '\' fnames(i,:)]);
+for k=1:length(fnames)
+    disp(['f: ' num2str(k)]);
+    EPIDsf(:,:,k) = EPIDprep([fdir '\' fnames(k,:)]);
 end
 end
 

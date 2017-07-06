@@ -1,4 +1,4 @@
-function [ DoseConv ] = getDoseConv( epid, gsumcr, gsumin, TMRratio, FmatInt, fmatInt )
+function [ DoseConv ] = getDoseConv( epid, gsumcr, gsumin, TMRratio, F_map, f_map )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 epid_max = mean2(epid(189:196,253:260));
@@ -64,7 +64,7 @@ for col=1:512;
 end
 
 %%        CALCULATE DOSE WITH CONVOLUTION EDGE CORRECTION
-DoseConv=mask.*conv_2.*TMRratio.*fmatInt./FmatInt;
+DoseConv=mask.*conv_2.*TMRratio.*f_map./F_map;
 
 end
 
