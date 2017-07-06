@@ -1,10 +1,7 @@
-function [ DoseConv ] = getDoseConv( epid, gsumcr, gsumin, TMRratio, F_map, f_map )
+function [ DoseConv ] = getDoseConv( epid, mask, gsumcr, gsumin, TMRratio, F_map, f_map )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
-epid_max = mean2(epid(189:196,253:260));
-epid_min = mean2(epid(1:8,1:8));
-% Over 2 or 4? Normally 4, can be 2.
-mask = (epid > abs(epid_max+epid_min)/4);
+
 %% Cross Plane
 conv_1=zeros(384,512);
 for row=1:384;

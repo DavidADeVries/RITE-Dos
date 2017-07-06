@@ -13,17 +13,25 @@ tps=double(tps);
 tps=100*tps*tps_info.DoseGridScaling/nFractions;
 
 
-%% Adjusts the EPIDs for left-right and superior-inferior displacement.
 epid_elements=sort(EPID(:),'descend');
 epid_64_max=mean(epid_elements(1:64));
-epid_64_min=mean(epid_elements(end-100:end-150));
-epid=+(EPID>abs(epid_64_max+epid_64_min)/4);
+epid_64_min=mean(epid_elements(end-64:end));
+mask_epid=+(EPID>abs(epid_64_max+epid_64_min)/4);
+
 
 tps_64_max=sort(tps(:),'descend');
-tps_64_max=mean(tps_64_max(101:151));
+tps_64_max=mean(tps_64_max(1:64));
 mask_tps=+(tps>abs(tps_64_max)*.5);
 
-mask_diff = mask-mask_tps;
+%% Adjusts the EPIDs for left-right and superior-inferior displacement.
+epid_max = mean2(EPID(189:196,253:260));
+epid_min = mean2(EPID(1:8,1:8));
+mask = (EPID > abs(epid_max+epid_min)/4);
+
+eclipse_max = mean2(tps(189:196,253:260));
+mask_eclipse = (tps(:,:,i)>abs(eclipse_max)/2);
+
+mask_diff = mask-mask_eclipse;
 
 epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
 epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
@@ -31,9 +39,9 @@ epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
 epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
 epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));    
 
-EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
+shiftEPIDsF = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
 
-mask_epid=+(EPID>abs(epid_64_max+epid_64_min)/4);
+mask_epid=+(shiftEPIDsF>abs(epid_64_max+epid_64_min)/4);
 
 
 l_tps=round(sqrt(nnz(mask_tps)*0.05227*0.05227));
@@ -100,8 +108,8 @@ TPR2 = reshape(TPR2, 384, 512);
 TPRR_map = TPR1./TPR2;
 
 % Find map with w and l to weights.
-[ w_close, wwindex ] = min(abs(Fw_s - w));
-[ l_close, wlindex ] = min(abs(Fl_s - l));
+[ w_close wwindex ] = min(abs(Fw_s - w));
+[ l_close wlindex ] = min(abs(Fl_s - l));
 
 gsumcr=(w_cr(1)*g1+w_cr(2)*g2+w_cr(3)*g3+w_cr(4)*g4)/trapz(w_cr(1)*g1+w_cr(2)*g2+w_cr(3)*g3+w_cr(4)*g4);
 gsumin=(w_in(1)*g1+w_in(2)*g2+w_in(3)*g3+w_in(4)*g4)/trapz(w_in(1)*g1+w_in(2)*g2+w_in(3)*g3+w_in(4)*g4);
