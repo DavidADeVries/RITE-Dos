@@ -66,6 +66,9 @@ for i=1:size(EPIDsF,3)
     
     shiftEPIDsF = circshift(EPIDsF(:,:,i), [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
     
+    epid_elements=sort(shiftEPIDsF,'descend');
+    epid_64_max=mean(epid_elements(1:64));
+    epid_64_min=mean(epid_elements(end-100:end-150));
     mask_epid=+(shiftEPIDsF>abs(epid_64_max+epid_64_min)/4);
     %% In-plane gaussian
     [w_in,ConvRescaleFactor_in]=Fit2GaussConv(shiftEPIDsF(:,256)',ECLIPSEs(:,256,i)',SD1,SD2,SD3,SD4);
@@ -119,12 +122,12 @@ for i=1:size(EPIDsF,3)
     
     DoseConv = getDoseConv(shiftEPIDsF,mask_epid,gsumcr,gsumin,TMRratio,F_map,fmap);
     DoseConvs(:,:,i) = DoseConv;
-    doseconv_profile = DoseConv(192,:);
-    figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(192,:,i)./F_map(192,:));
-    doseconv_profile = DoseConv(:,256);
-    tps_profile=ECLIPSEs(:,256,i);
-    figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(:,256,i)./F_map(:,256));
-   
+%     doseconv_profile = DoseConv(192,:);
+%     figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(192,:,i)./F_map(192,:));
+%     doseconv_profile = DoseConv(:,256);
+%     tps_profile=ECLIPSEs(:,256,i);
+%     figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(:,256,i)./F_map(:,256));
+%    
     
 %     imagesc(DoseConv)
 %     figure()

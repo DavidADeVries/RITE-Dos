@@ -2,7 +2,7 @@ classdef Constants
     %Constants
     
     properties (Constant)
-        Use_Mex_Code = true; % set true for C code speed-up
+        Use_Mex_Code = false; % set true for C code speed-up
         
         Source_To_Axis_Distance_In_Cm = 100;
         Axis_To_EPID_Distance_In_Cm = 50;
