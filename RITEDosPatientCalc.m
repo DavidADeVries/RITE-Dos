@@ -68,12 +68,10 @@ try
     %% Get patient w, l, and d map from CT (DAVID)
 
     % Choose RT plan file
-    % plan=dicominfo(planfile(1).name);
-    % nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-    % CTdir = uigetdir();
-    % [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
-    % assignin('base','WEDsource2iso',WEDsource2iso);
-    % assignin('base','WEDiso2epid',WEDiso2epid);
+%     plan=dicominfo(planfile(1).name);
+%     nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
+    CTdir = uigetdir();
+    [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
     d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
