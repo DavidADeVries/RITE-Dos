@@ -71,8 +71,13 @@ try
     % Choose RT plan file
 %     plan=dicominfo(planfile(1).name);
 %     nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
+<<<<<<< HEAD
 %     CTdir = uigetdir();
 %     [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
+=======
+    CTdir = uigetdir();
+    [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 180);
+>>>>>>> a214f825063ea9ce59dcfdbb8c8ab0812144785e
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
     d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
