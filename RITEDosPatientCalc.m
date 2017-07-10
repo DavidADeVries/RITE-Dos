@@ -58,7 +58,7 @@ try
     % Will include the F, f, and TPR arrays
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
-    load('firsttest.mat');
+    load('CommissionedVariables.mat');
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -70,8 +70,8 @@ try
     % Choose RT plan file
 %     plan=dicominfo(planfile(1).name);
 %     nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-    CTdir = uigetdir();
-    [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
+%     CTdir = uigetdir();
+%     [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
     d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
@@ -175,6 +175,9 @@ try
 
     %Convolving
     PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
+    
+    figure; imagesc((DOSE_NOCORR-tps)./tps);
+    figure; imagesc((PatDoseConv-tps)./tps);
 catch ME
     save 'PatCalcFail2'
     rethrow(ME)

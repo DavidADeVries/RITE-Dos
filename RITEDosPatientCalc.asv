@@ -37,7 +37,7 @@ try
 
     EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
 
-    mask_epid=+(EPID>abs(epid_64_max+epid_64_min)/4);
+    epid_mask=+(EPID>abs(epid_64_max+epid_64_min)/4);
 
 
     l_tps=round(sqrt(nnz(mask_tps)*0.05227*0.05227));
@@ -58,7 +58,7 @@ try
     % Will include the F, f, and TPR arrays
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
-    load('firsttest.mat');
+    load('Commissioned.mat');
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -68,12 +68,10 @@ try
     %% Get patient w, l, and d map from CT (DAVID)
 
     % Choose RT plan file
-    % plan=dicominfo(planfile(1).name);
-    % nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-    % CTdir = uigetdir();
-    % [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
-    % assignin('base','WEDsource2iso',WEDsource2iso);
-    % assignin('base','WEDiso2epid',WEDiso2epid);
+%     plan=dicominfo(planfile(1).name);
+%     nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
+    CTdir = uigetdir();
+    [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
     d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
@@ -101,7 +99,7 @@ try
     outLow = Fwindex < 1;
     outHigh = Fwindex > length(Fw_s);
     Fwindex(outLow) = 1;
-    Fwindex(outHigh = length(Fw_s);
+    Fwindex(outHigh) = length(Fw_s);
     
     if Flindex < 1
         Flindex = 1;
@@ -128,6 +126,20 @@ try
     TPRwindex = round((w_map./2-TPRdepth(1))/0.1)+1;
     TPRwdindex = round((w_map./2-d_map-TPRdepth(1))/0.1)+1;
     
+    outLow = TPRlindex < 1;
+    outHigh = TPRlindex > length(TPRfields);
+    TPRlindex(outLow) = 1;
+    TPRlindex(outHigh) = length(TPRfields);
+    
+    outLow = TPRwindex < 1;
+    outHigh = TPRwindex > length(TPRdepth);
+    TPRwindex(outLow) = 1;
+    TPRwindex(outHigh) = length(TPRdepth);
+    
+    outLow = TPRwdindex < 1;
+    outHigh = TPRwdindex > length(TPRdepth);
+    TPRwdindex(outLow) = 1;
+    TPRwdindex(outHigh) = length(TPRdepth);
     
     F_map = FmatInt(Fwindex,Flindex);
     F_map = reshape(F_map,384,512);
@@ -137,8 +149,10 @@ try
     f_map = fmatInt(fdindex,flindex);
     f_map = reshape(f_map,384,512);
 
+    %%%
+    TPRmatInt = TPRint;
+    %%%
     
-
     TPR1 = TPRmatInt(TPRwdindex,TPRlindex);
     TPR1 = reshape(TPR1, 384, 512);
     TPR2 = TPRmatInt(TPRwindex,TPRlindex);
@@ -149,14 +163,15 @@ try
     % Find map with w and l to weights.
     [ w_close, wwindex ] = min(abs(Fw_s - w));
     [ l_close, wlindex ] = min(abs(Fl_s - l));
-    w_in = weights(:,(wwindex-1)*length(Fl_s)+wlindex,1)
-
+    w_in = weights(:,(wwindex-1)*length(Fl_s)+wlindex,1);
+    w_cr = weights(:,(wwindex-1)*length(Fl_s)+wlindex,2);
+    
     gsumcr=(w_cr(1)*g1+w_cr(2)*g2+w_cr(3)*g3+w_cr(4)*g4)/trapz(w_cr(1)*g1+w_cr(2)*g2+w_cr(3)*g3+w_cr(4)*g4);
     gsumin=(w_in(1)*g1+w_in(2)*g2+w_in(3)*g3+w_in(4)*g4)/trapz(w_in(1)*g1+w_in(2)*g2+w_in(3)*g3+w_in(4)*g4);
 
     %% Create Patient Dose maps
     % Before convolution
-    DOSE_NOCORR=mask_epid.*EPID.*TMRratio.*fmatrix./Fmatrix;
+    DOSE_NOCORR=epid_mask.*EPID.*TPRR_map.*f_map./F_map;
 
     %Convolving
     PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
