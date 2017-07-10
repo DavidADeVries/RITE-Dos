@@ -28,29 +28,30 @@ try
     tps_64_max=mean(tps_64_max(101:151));
     mask_tps=+(tps>abs(tps_64_max)*.5);
 
-    mask_diff = mask-mask_tps;
-
-    epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
-    epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
-
-    epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
-    epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));    
-
-    EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
+    mask_diff = double(mask)-double(mask_tps);
+% 
+%     epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
+%     epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
+% 
+%     epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
+%     epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));    
+% 
+%     EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
 
     epid_mask=+(EPID>abs(epid_64_max+epid_64_min)/4);
 
 
     l_tps=round(sqrt(nnz(mask_tps)*0.05227*0.05227));
-    l_epid=round(sqrt(nnz(mask_tps)*0.05227*0.05227));
+    l_epid=round(sqrt(nnz(epid_mask)*0.05227*0.05227));
 
     if abs(l_tps - l_epid) > 1
         disp('Field sizes of the treatment planning system and EPID images taken do not seem to match')
     else
         l=l_epid;
     end
+    
     % May also have an option to override when l's don't match.
-
+    l=l_epid;
 
 
 
@@ -74,18 +75,23 @@ try
 %     nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
 %     CTdir = uigetdir();
 %     [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
+%     WEDsource2iso = 10*ones(384,512)/100;
+%     WEDiso2epid = 10*ones(384,512)/100;
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
+    
     d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
+    
     if size(w_map,1) > size(w_map,2)
         w_map = w_map';
         d_map = d_map';
     end
+    w_map = fliplr(w_map);
+    d_map = fliplr(d_map);
+    w_map = circshift(w_map,-5,1);
+    d_map = circshift(d_map,-5,1);
     w = mean2(w_map(189:196,253:260));
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % d_map is out of the bounds, ie -10 to 10. Probably calculating it
-    % incorrectly but ask Stefano on Monday.
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     Fl_s = 5:5:20;
     Fw_s = 5:5:40;
     fl_s = Fl_s;
@@ -168,14 +174,20 @@ try
     %% Create Patient Dose maps
     % Before convolution
     DOSE_NOCORR=epid_mask.*EPID.*TPRR_map.*f_map./F_map;
-
+    tpscax = mean2(tps(189:196,253:260));
+    nocorrcax = (mean2(DOSE_NOCORR(189:196,253:260))-tpscax)./tpscax*100;
     %Convolving
     PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
+    convcax = (mean2(PatDoseConv(189:196,253:260))-tpscax)/tpscax*100;
     
-    figure; imagesc((DOSE_NOCORR-tps)./tps*100);
-    colorbar; set(gca, 'CLim', [-10 10]);
-    figure; imagesc((PatDoseConv-tps)./tps*100);
-    colorbar; set(gca, 'CLim', [-10 10]);
+    figure; imagesc((DOSE_NOCORR-tps)./tps*100); title(['% dose diff, NO CORR (CAX = ' num2str(nocorrcax) ')']);
+    colorbar; set(gca, 'CLim', [-15 15]); colormap jet; axis equal; axis tight;
+    figure; imagesc((PatDoseConv-tps)./tps*100); title(['% dose diff, CONV CORR (CAX = ' num2str(convcax) ')']);
+    colorbar; set(gca, 'CLim', [-15 15]); colormap jet; axis equal; axis tight;
+    
+    convcax;
+
+
 catch ME
     save 'PatCalcFail2'
     rethrow(ME)

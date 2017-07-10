@@ -29,14 +29,14 @@ try
     mask_tps=+(tps>abs(tps_64_max)*.5);
 
     mask_diff = mask-mask_tps;
-
-    epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
-    epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
-
-    epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
-    epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));    
-
-    EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
+% 
+%     epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
+%     epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
+% 
+%     epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
+%     epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));    
+% 
+%     EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
 
     epid_mask=+(EPID>abs(epid_64_max+epid_64_min)/4);
 
@@ -60,6 +60,7 @@ try
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
     load('CommissionedVariables.mat');
+    TPRmatInt = TPRint;
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -71,13 +72,9 @@ try
     % Choose RT plan file
 %     plan=dicominfo(planfile(1).name);
 %     nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-<<<<<<< HEAD
 %     CTdir = uigetdir();
 %     [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
-=======
-    CTdir = uigetdir();
-    [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 180);
->>>>>>> a214f825063ea9ce59dcfdbb8c8ab0812144785e
+ 
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
     d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
@@ -103,14 +100,14 @@ try
     Flindex = round((l-Fl_s(1))/0.1)+1;
     
     outLow = Fwindex < 1;
-    outHigh = Fwindex > size(;
+    outHigh = Fwindex > size(FmatInt,1);
     Fwindex(outLow) = 1;
-    Fwindex(outHigh) = length(Fw_s);
+    Fwindex(outHigh) = size(FmatInt,1);
     
     if Flindex < 1
         Flindex = 1;
-    elseif Flindex > length(Fl_s)
-        Flindex = length(Fl_s);
+    elseif Flindex > size(FmatInt,2)
+        Flindex = size(FmatInt,2);
     end
     
     
@@ -118,14 +115,14 @@ try
     flindex = round((l-fl_s(1))/0.1)+1;
     
     outLow = fdindex < 1;
-    outHigh = fdindex > length(fd_s);
+    outHigh = fdindex > size(fmatInt,1);
     fdindex(outLow) = 1;
-    fdindex(outHigh) = length(fd_s);
+    fdindex(outHigh) = size(FmatInt,1);
     
     if flindex < 1
         flindex = 1;
-    elseif flindex > length(fl_s)
-        flindex = length(fl_s);
+    elseif flindex > size(FmatInt,2)
+        flindex = size(FmatInt,2);
     end
     
     TPRlindex = round((l-TPRfields(1))/0.1)+1;
@@ -133,31 +130,25 @@ try
     TPRwdindex = round((w_map./2-d_map-TPRdepth(1))/0.1)+1;
     
     outLow = TPRlindex < 1;
-    outHigh = TPRlindex > length(TPRfields);
+    outHigh = TPRlindex > size(TPRmatInt,2);
     TPRlindex(outLow) = 1;
-    TPRlindex(outHigh) = length(TPRfields);
+    TPRlindex(outHigh) = size(TPRmatInt,2);
     
     outLow = TPRwindex < 1;
-    outHigh = TPRwindex > length(TPRdepth);
+    outHigh = TPRwindex > size(TPRmatInt,1);
     TPRwindex(outLow) = 1;
-    TPRwindex(outHigh) = length(TPRdepth);
+    TPRwindex(outHigh) = size(TPRmatInt,1);
     
     outLow = TPRwdindex < 1;
-    outHigh = TPRwdindex > length(TPRdepth);
+    outHigh = TPRwdindex > size(TPRmatInt,1);
     TPRwdindex(outLow) = 1;
-    TPRwdindex(outHigh) = length(TPRdepth);
+    TPRwdindex(outHigh) = size(TPRmatInt,1);
     
     F_map = FmatInt(Fwindex,Flindex);
     F_map = reshape(F_map,384,512);
 
-    
-    
     f_map = fmatInt(fdindex,flindex);
     f_map = reshape(f_map,384,512);
-
-    %%%
-    TPRmatInt = TPRint;
-    %%%
     
     TPR1 = TPRmatInt(TPRwdindex,TPRlindex);
     TPR1 = reshape(TPR1, 384, 512);
@@ -178,12 +169,16 @@ try
     %% Create Patient Dose maps
     % Before convolution
     DOSE_NOCORR=epid_mask.*EPID.*TPRR_map.*f_map./F_map;
-
+    tpscax = mean2(tps(189:196,253:260));
+    nocorrcax = (mean2(DOSE_NOCORR(189:196,253:260))-tpscax)./tpscax*100;
     %Convolving
     PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
+    convcax = (mean2(PatDoseConv(189:196,253:260))-tpscax)/tpscax*100;
     
-    figure; imagesc((DOSE_NOCORR-tps)./tps);
-    figure; imagesc((PatDoseConv-tps)./tps);
+    figure; imagesc((DOSE_NOCORR-tps)./tps*100); title(['% dose diff, NO CORR (CAX = ' num2str(nocorrcax) ')']);
+    colorbar; set(gca, 'CLim', [-15 15]); colormap jet; axis equal; axis tight;
+    figure; imagesc((PatDoseConv-tps)./tps*100); title(['% dose diff, CONV CORR (CAX = ' num2str(convcax) ')']);
+    colorbar; set(gca, 'CLim', [-15 15]); colormap jet; axis equal; axis tight;
 catch ME
     save 'PatCalcFail2'
     rethrow(ME)
