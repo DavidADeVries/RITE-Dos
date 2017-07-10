@@ -67,14 +67,13 @@ else % run through the voxels
     
     % calc what t value represents being past isocentre
     sourceToDetectorInM = norm(pointSourceCoords - pointDetectorCoords);
+    deltaNorm = norm(deltas);
     
     sinTheta = (sourceToAxisInM + axisToEpidInM) ./ sourceToDetectorInM;
     
     sourceToIsoForRayInM = sourceToAxisInM ./ sinTheta;
     
-    ratio = sourceToIsoForRayInM ./ sourceToDetectorInM;
-    
-    tCrossover = tMin + (ratio .* (tMax - tMin));
+    tCrossover = sourceToIsoForRayInM ./ deltaNorm;
     
     sourceStartingPoint = sourceStartingPoint - phantomLocationInM; %shift over so corner is at origin
     

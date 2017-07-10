@@ -19,8 +19,8 @@ try
 
     %% Adjusts the EPIDs for left-right and superior-inferior displacement.
     epid_elements=sort(EPID(:),'descend');
-    epid_64_max=mean(epid_elements(1:64));
-    epid_64_min=mean(epid_elements(end-100:end-150));
+    epid_64_max=mean(epid_elements(101:151));
+    epid_64_min=mean(epid_elements(end-150:end-100));
     mask=+(EPID>abs(epid_64_max+epid_64_min)/4);
 
     tps_64_max=sort(tps(:),'descend');
@@ -76,7 +76,7 @@ try
     % assignin('base','WEDiso2epid',WEDiso2epid);
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
-    d_map=(WEDiso2epid-WEDsource2iso)/2*Constants.m_to_cm;
+    d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
     if size(w_map,1) > size(w_map,2)
         w_map = w_map';
         d_map = d_map';
@@ -133,7 +133,7 @@ try
     %Convolving
     PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
 catch ME
-    save 'PatCalcFail'
+    save 'PatCalcFail2'
     rethrow(ME)
 end
 end
