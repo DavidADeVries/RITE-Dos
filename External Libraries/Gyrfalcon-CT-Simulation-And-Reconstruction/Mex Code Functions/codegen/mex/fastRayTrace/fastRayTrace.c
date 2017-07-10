@@ -16,13 +16,13 @@
 #include "fastRayTrace_data.h"
 
 /* Variable Definitions */
-static emlrtRSInfo emlrtRSI = { 102,   /* lineNo */
+static emlrtRSInfo emlrtRSI = { 101,   /* lineNo */
   "fastRayTrace",                      /* fcnName */
   "C:\\Users\\MPRadmin\\Git Repos\\RITE-Dos\\External Libraries\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTra"
   "ce.m"                               /* pathName */
 };
 
-static emlrtRSInfo b_emlrtRSI = { 108, /* lineNo */
+static emlrtRSInfo b_emlrtRSI = { 107, /* lineNo */
   "fastRayTrace",                      /* fcnName */
   "C:\\Users\\MPRadmin\\Git Repos\\RITE-Dos\\External Libraries\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTra"
   "ce.m"                               /* pathName */
@@ -38,7 +38,7 @@ static emlrtRSInfo d_emlrtRSI = { 19,  /* lineNo */
   "C:\\Program Files\\MATLAB\\R2017a\\toolbox\\eml\\eml\\+coder\\+internal\\minOrMax.m"/* pathName */
 };
 
-static emlrtDCInfo emlrtDCI = { 115,   /* lineNo */
+static emlrtDCInfo emlrtDCI = { 114,   /* lineNo */
   47,                                  /* colNo */
   "fastRayTrace",                      /* fName */
   "C:\\Users\\MPRadmin\\Git Repos\\RITE-Dos\\External Libraries\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTra"
@@ -48,7 +48,7 @@ static emlrtDCInfo emlrtDCI = { 115,   /* lineNo */
 
 static emlrtBCInfo emlrtBCI = { -1,    /* iFirst */
   -1,                                  /* iLast */
-  115,                                 /* lineNo */
+  114,                                 /* lineNo */
   47,                                  /* colNo */
   "phantomData",                       /* aName */
   "fastRayTrace",                      /* fName */
@@ -57,7 +57,7 @@ static emlrtBCInfo emlrtBCI = { -1,    /* iFirst */
   0                                    /* checkKind */
 };
 
-static emlrtDCInfo b_emlrtDCI = { 115, /* lineNo */
+static emlrtDCInfo b_emlrtDCI = { 114, /* lineNo */
   59,                                  /* colNo */
   "fastRayTrace",                      /* fName */
   "C:\\Users\\MPRadmin\\Git Repos\\RITE-Dos\\External Libraries\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTra"
@@ -67,7 +67,7 @@ static emlrtDCInfo b_emlrtDCI = { 115, /* lineNo */
 
 static emlrtBCInfo b_emlrtBCI = { -1,  /* iFirst */
   -1,                                  /* iLast */
-  115,                                 /* lineNo */
+  114,                                 /* lineNo */
   59,                                  /* colNo */
   "phantomData",                       /* aName */
   "fastRayTrace",                      /* fName */
@@ -76,7 +76,7 @@ static emlrtBCInfo b_emlrtBCI = { -1,  /* iFirst */
   0                                    /* checkKind */
 };
 
-static emlrtDCInfo c_emlrtDCI = { 115, /* lineNo */
+static emlrtDCInfo c_emlrtDCI = { 114, /* lineNo */
   71,                                  /* colNo */
   "fastRayTrace",                      /* fName */
   "C:\\Users\\MPRadmin\\Git Repos\\RITE-Dos\\External Libraries\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTra"
@@ -86,7 +86,7 @@ static emlrtDCInfo c_emlrtDCI = { 115, /* lineNo */
 
 static emlrtBCInfo c_emlrtBCI = { -1,  /* iFirst */
   -1,                                  /* iLast */
-  115,                                 /* lineNo */
+  114,                                 /* lineNo */
   71,                                  /* colNo */
   "phantomData",                       /* aName */
   "fastRayTrace",                      /* fName */
@@ -108,7 +108,7 @@ static emlrtRTEInfo c_emlrtRTEI = { 121,/* lineNo */
 };
 
 static emlrtECInfo emlrtECI = { -1,    /* nDims */
-  152,                                 /* lineNo */
+  151,                                 /* lineNo */
   5,                                   /* colNo */
   "fastRayTrace",                      /* fName */
   "C:\\Users\\MPRadmin\\Git Repos\\RITE-Dos\\External Libraries\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTra"
@@ -116,7 +116,7 @@ static emlrtECInfo emlrtECI = { -1,    /* nDims */
 };
 
 static emlrtECInfo b_emlrtECI = { -1,  /* nDims */
-  153,                                 /* lineNo */
+  152,                                 /* lineNo */
   5,                                   /* colNo */
   "fastRayTrace",                      /* fName */
   "C:\\Users\\MPRadmin\\Git Repos\\RITE-Dos\\External Libraries\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTra"
@@ -254,8 +254,8 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
   int32_T partialTrueCount;
   int32_T ixstart;
   int32_T trueCount;
-  real_T sourceToDetectorInM;
-  real_T tCrossover;
+  real_T b_bounds1;
+  real_T length;
   real_T tMins[3];
   real_T deltas[3];
   real_T tMaxs[3];
@@ -265,10 +265,11 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
   int32_T b_tmp_data[3];
   real_T tMin;
   real_T tMax;
+  real_T tCrossover;
   boolean_T isVoxelDim0[3];
-  boolean_T isDeltaNeg;
   boolean_T latticeToIndex[3];
-  boolean_T b_isDeltaNeg[3];
+  boolean_T isDeltaNeg[3];
+  boolean_T b_isDeltaNeg;
   real_T nextLatticeAdder[3];
   static const int8_T iv0[3] = { 1, -1, -1 };
 
@@ -300,15 +301,12 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
   /*  creates a description of a line in 3-space to satisfy the equation: */
   /*  newPoint = point + t*deltas */
   for (ixstart = 0; ixstart < 3; ixstart++) {
-    sourceToDetectorInM = pointDetectorCoords[ixstart] -
-      pointSourceCoords[ixstart];
-    tCrossover = 1.0 / sourceToDetectorInM;
-    tMins[ixstart] = (bounds1[ixstart] - pointSourceCoords[ixstart]) *
-      tCrossover;
-    tMaxs[ixstart] = (bounds2[ixstart] - pointSourceCoords[ixstart]) *
-      tCrossover;
-    deltas[ixstart] = sourceToDetectorInM;
-    invDeltas[ixstart] = tCrossover;
+    b_bounds1 = pointDetectorCoords[ixstart] - pointSourceCoords[ixstart];
+    length = 1.0 / b_bounds1;
+    tMins[ixstart] = (bounds1[ixstart] - pointSourceCoords[ixstart]) * length;
+    tMaxs[ixstart] = (bounds2[ixstart] - pointSourceCoords[ixstart]) * length;
+    deltas[ixstart] = b_bounds1;
+    invDeltas[ixstart] = length;
   }
 
   trueCount = 0;
@@ -419,26 +417,25 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
     for (ixstart = 0; ixstart < 3; ixstart++) {
       currentLattices[ixstart] = pointSourceCoords[ixstart] -
         pointDetectorCoords[ixstart];
-      tCrossover = pointSourceCoords[ixstart] - phantomLocationInM[ixstart];
-      tMins[ixstart] = tCrossover + tMin * deltas[ixstart];
+      b_bounds1 = pointSourceCoords[ixstart] - phantomLocationInM[ixstart];
+      tMins[ixstart] = b_bounds1 + tMin * deltas[ixstart];
       isVoxelDim0[ixstart] = (voxelDimsInM[ixstart] == 0.0);
-      isDeltaNeg = (deltas[ixstart] < 0.0);
+      b_isDeltaNeg = (deltas[ixstart] < 0.0);
       tMaxs[ixstart] = 1.0 / voxelDimsInM[ixstart];
-      latticeToIndex[ixstart] = isDeltaNeg;
-      bounds2[ixstart] = tCrossover;
-      b_isDeltaNeg[ixstart] = isDeltaNeg;
+      latticeToIndex[ixstart] = b_isDeltaNeg;
+      bounds2[ixstart] = b_bounds1;
+      isDeltaNeg[ixstart] = b_isDeltaNeg;
       nextLatticeAdder[ixstart] = muDoubleScalarSign(deltas[ixstart]) * (real_T)
         iv0[ixstart];
     }
 
-    sourceToDetectorInM = norm(currentLattices);
-    tCrossover = tMin + sourceToAxisInM / ((sourceToAxisInM + axisToEpidInM) /
-      sourceToDetectorInM) / sourceToDetectorInM * (tMax - tMin);
+    tCrossover = sourceToAxisInM / ((sourceToAxisInM + axisToEpidInM) / norm
+      (currentLattices)) / norm(deltas);
 
     /* shift over so corner is at origin */
     /*  have starting point and end point, now will find which voxels and with */
     /*  what distances across each voxel the ray travels */
-    latticeToIndex[0] = !b_isDeltaNeg[0];
+    latticeToIndex[0] = !isDeltaNeg[0];
     for (ixstart = 0; ixstart < 3; ixstart++) {
       if (deltas[ixstart] == 0.0) {
         latticeToIndex[ixstart] = true;
@@ -448,7 +445,7 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
     /* needs to be, since we always floor to find the lattice for delta == 0 */
     while (tMax - tMin > 1.0E-9) {
       for (partialTrueCount = 0; partialTrueCount < 3; partialTrueCount++) {
-        c_isDeltaNeg[partialTrueCount] = b_isDeltaNeg[partialTrueCount];
+        c_isDeltaNeg[partialTrueCount] = isDeltaNeg[partialTrueCount];
         b_deltas[partialTrueCount] = (deltas[partialTrueCount] == 0.0);
       }
 
@@ -477,12 +474,12 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
       b_st.site = &c_emlrtRSI;
       c_st.site = &d_emlrtRSI;
       if ((trueCount == 1) || (trueCount != 1)) {
-        isDeltaNeg = true;
+        b_isDeltaNeg = true;
       } else {
-        isDeltaNeg = false;
+        b_isDeltaNeg = false;
       }
 
-      if (!isDeltaNeg) {
+      if (!b_isDeltaNeg) {
         emlrtErrorWithMessageIdR2012b(&c_st, &b_emlrtRTEI,
           "Coder:toolbox:autoDimIncompatibility", 0);
       }
@@ -522,16 +519,14 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
       }
 
       for (partialTrueCount = 0; partialTrueCount < 3; partialTrueCount++) {
-        sourceToDetectorInM = bounds2[partialTrueCount] + tMin *
-          deltas[partialTrueCount];
-        b_tMins[partialTrueCount] = tMins[partialTrueCount] -
-          sourceToDetectorInM;
-        bounds1[partialTrueCount] = sourceToDetectorInM;
+        b_bounds1 = bounds2[partialTrueCount] + tMin * deltas[partialTrueCount];
+        b_tMins[partialTrueCount] = tMins[partialTrueCount] - b_bounds1;
+        bounds1[partialTrueCount] = b_bounds1;
         currentLattices[partialTrueCount] += (real_T)
           latticeToIndex[partialTrueCount];
       }
 
-      sourceToDetectorInM = norm(b_tMins);
+      length = norm(b_tMins);
       if (currentLattices[1] != (int32_T)muDoubleScalarFloor(currentLattices[1]))
       {
         emlrtIntegerCheckR2012b(currentLattices[1], &emlrtDCI, sp);
@@ -574,16 +569,16 @@ void fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3], const
 
       if (tMin <= tCrossover) {
         /*  in the source-to-iso area */
-        *waterEquivDoseSourceToIso += sourceToDetectorInM * phantomData->data
-          [(((int32_T)currentLattices[1] + phantomData->size[0] * ((int32_T)
-              currentLattices[0] - 1)) + phantomData->size[0] *
-            phantomData->size[1] * ((int32_T)currentLattices[2] - 1)) - 1];
+        *waterEquivDoseSourceToIso += length * phantomData->data[(((int32_T)
+          currentLattices[1] + phantomData->size[0] * ((int32_T)currentLattices
+          [0] - 1)) + phantomData->size[0] * phantomData->size[1] * ((int32_T)
+          currentLattices[2] - 1)) - 1];
       } else {
         /*  in the iso-to-EPID area */
-        *waterEquivDoseIsoToEpid += sourceToDetectorInM * phantomData->data
-          [(((int32_T)currentLattices[1] + phantomData->size[0] * ((int32_T)
-              currentLattices[0] - 1)) + phantomData->size[0] *
-            phantomData->size[1] * ((int32_T)currentLattices[2] - 1)) - 1];
+        *waterEquivDoseIsoToEpid += length * phantomData->data[(((int32_T)
+          currentLattices[1] + phantomData->size[0] * ((int32_T)currentLattices
+          [0] - 1)) + phantomData->size[0] * phantomData->size[1] * ((int32_T)
+          currentLattices[2] - 1)) - 1];
       }
 
       if (*emlrtBreakCheckR2012bFlagVar != 0) {

@@ -73,103 +73,102 @@
 <span class="srcline"><span class="lineno"><a href="1,67" id="srcline67"> 67</a></span><span class="line">    </span></span>
 <span class="srcline"><span class="lineno"><a href="1,68" id="srcline68"> 68</a></span><span class="line">    <span class="comment">% calc what t value represents being past isocentre</span></span></span>
 <span class="srcline"><span class="lineno"><a href="1,69" id="srcline69"> 69</a></span><span class="line">    sourceToDetectorInM = norm(pointSourceCoords - pointDetectorCoords);</span></span>
-<span class="srcline"><span class="lineno"><a href="1,70" id="srcline70"> 70</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,71" id="srcline71"> 71</a></span><span class="line">    sinTheta = (sourceToAxisInM + axisToEpidInM) ./ sourceToDetectorInM;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,72" id="srcline72"> 72</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,73" id="srcline73"> 73</a></span><span class="line">    sourceToIsoForRayInM = sourceToAxisInM ./ sinTheta;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,74" id="srcline74"> 74</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,75" id="srcline75"> 75</a></span><span class="line">    ratio = sourceToIsoForRayInM ./ sourceToDetectorInM;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,76" id="srcline76"> 76</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,77" id="srcline77"> 77</a></span><span class="line">    tCrossover = tMin + (ratio .* (tMax - tMin));</span></span>
-<span class="srcline"><span class="lineno"><a href="1,78" id="srcline78"> 78</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,79" id="srcline79"> 79</a></span><span class="line">    sourceStartingPoint = sourceStartingPoint - phantomLocationInM; <span class="comment">%shift over so corner is at origin</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,80" id="srcline80"> 80</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,81" id="srcline81"> 81</a></span><span class="line">    currentT = tMin;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,82" id="srcline82"> 82</a></span><span class="line">    currentPoint = sourceStartingPoint + currentT .* deltas;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,83" id="srcline83"> 83</a></span><span class="line">    endingT = tMax;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,84" id="srcline84"> 84</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,85" id="srcline85"> 85</a></span><span class="line">    <span class="comment">% have starting point and end point, now will find which voxels and with</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,86" id="srcline86"> 86</a></span><span class="line">    <span class="comment">% what distances across each voxel the ray travels</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,87" id="srcline87"> 87</a></span><span class="line">           </span></span>
-<span class="srcline"><span class="lineno"><a href="1,88" id="srcline88"> 88</a></span><span class="line">    isVoxelDim0 = (voxelDimsInM == 0);</span></span>
-<span class="srcline"><span class="lineno"><a href="1,89" id="srcline89"> 89</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,90" id="srcline90"> 90</a></span><span class="line">    isDelta0 = (deltas == 0);</span></span>
-<span class="srcline"><span class="lineno"><a href="1,91" id="srcline91"> 91</a></span><span class="line">    isDeltaNeg = (deltas &lt; 0);</span></span>
-<span class="srcline"><span class="lineno"><a href="1,92" id="srcline92"> 92</a></span><span class="line">    invVoxelDims = 1 ./ voxelDimsInM;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,93" id="srcline93"> 93</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,94" id="srcline94"> 94</a></span><span class="line">    nextLatticeAdder = sign(deltas) .* [1 -1 -1];</span></span>
-<span class="srcline"><span class="lineno"><a href="1,95" id="srcline95"> 95</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,96" id="srcline96"> 96</a></span><span class="line">    latticeToIndex = isDeltaNeg;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,97" id="srcline97"> 97</a></span><span class="line">    latticeToIndex(1) = ~latticeToIndex(1);</span></span>
-<span class="srcline"><span class="lineno"><a href="1,98" id="srcline98"> 98</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,99" id="srcline99"> 99</a></span><span class="line">    latticeToIndex(isDelta0) = 1; <span class="comment">%needs to be, since we always floor to find the lattice for delta == 0</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,100" id="srcline100">100</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,101" id="srcline101">101</a></span><span class="line">    while endingT - currentT &gt; Constants.Round_Off_Error_Bound</span></span>
-<span class="srcline"><span class="lineno"><a href="1,102" id="srcline102">102</a></span><span class="line">        currentLattices = getLattices(currentPoint, invVoxelDims, isVoxelDim0, isDeltaNeg, isDelta0);</span></span>
-<span class="srcline"><span class="lineno"><a href="1,103" id="srcline103">103</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,104" id="srcline104">104</a></span><span class="line">        nextLattices = currentLattices + nextLatticeAdder;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,105" id="srcline105">105</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,106" id="srcline106">106</a></span><span class="line">        tValsForNextLattices = ((nextLattices .* voxelDimsInM .* [1 -1 -1]) - sourceStartingPoint) .* invDeltas;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,107" id="srcline107">107</a></span><span class="line">                </span></span>
-<span class="srcline"><span class="lineno"><a href="1,108" id="srcline108">108</a></span><span class="line">        nextT = min(tValsForNextLattices(~isDelta0));</span></span>
-<span class="srcline"><span class="lineno"><a href="1,109" id="srcline109">109</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,110" id="srcline110">110</a></span><span class="line">        nextPoint = sourceStartingPoint + nextT .* deltas;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,111" id="srcline111">111</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,112" id="srcline112">112</a></span><span class="line">        length = norm(currentPoint - nextPoint);</span></span>
-<span class="srcline"><span class="lineno"><a href="1,113" id="srcline113">113</a></span><span class="line">        indices = currentLattices + latticeToIndex;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,114" id="srcline114">114</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,115" id="srcline115">115</a></span><span class="line">        relativeElectronDensity = phantomData(indices(2), indices(1), indices(3));</span></span>
-<span class="srcline"><span class="lineno"><a href="1,116" id="srcline116">116</a></span><span class="line">                </span></span>
-<span class="srcline"><span class="lineno"><a href="1,117" id="srcline117">117</a></span><span class="line">        currentT = nextT;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,118" id="srcline118">118</a></span><span class="line">        currentPoint = nextPoint;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,119" id="srcline119">119</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,120" id="srcline120">120</a></span><span class="line">        if currentT &lt;= tCrossover <span class="comment">% in the source-to-iso area</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,121" id="srcline121">121</a></span><span class="line">            waterEquivDoseSourceToIso = waterEquivDoseSourceToIso + length .* relativeElectronDensity;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,122" id="srcline122">122</a></span><span class="line">        else <span class="comment">% in the iso-to-EPID area</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,123" id="srcline123">123</a></span><span class="line">            waterEquivDoseIsoToEpid = waterEquivDoseIsoToEpid + length .* relativeElectronDensity;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,124" id="srcline124">124</a></span><span class="line">        end</span></span>
-<span class="srcline"><span class="lineno"><a href="1,125" id="srcline125">125</a></span><span class="line">              </span></span>
-<span class="srcline"><span class="lineno"><a href="1,126" id="srcline126">126</a></span><span class="line">    end</span></span>
-<span class="srcline"><span class="lineno"><a href="1,127" id="srcline127">127</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,128" id="srcline128">128</a></span><span class="line">end</span></span>
-<span class="srcline"><span class="lineno"><a href="1,129" id="srcline129">129</a></span><span class="line"></span></span>
-<span class="srcline"><span class="lineno"><a href="1,130" id="srcline130">130</a></span><span class="line">end</span></span>
+<span class="srcline"><span class="lineno"><a href="1,70" id="srcline70"> 70</a></span><span class="line">    deltaNorm = norm(deltas);</span></span>
+<span class="srcline"><span class="lineno"><a href="1,71" id="srcline71"> 71</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,72" id="srcline72"> 72</a></span><span class="line">    sinTheta = (sourceToAxisInM + axisToEpidInM) ./ sourceToDetectorInM;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,73" id="srcline73"> 73</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,74" id="srcline74"> 74</a></span><span class="line">    sourceToIsoForRayInM = sourceToAxisInM ./ sinTheta;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,75" id="srcline75"> 75</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,76" id="srcline76"> 76</a></span><span class="line">    tCrossover = sourceToIsoForRayInM ./ deltaNorm;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,77" id="srcline77"> 77</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,78" id="srcline78"> 78</a></span><span class="line">    sourceStartingPoint = sourceStartingPoint - phantomLocationInM; <span class="comment">%shift over so corner is at origin</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,79" id="srcline79"> 79</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,80" id="srcline80"> 80</a></span><span class="line">    currentT = tMin;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,81" id="srcline81"> 81</a></span><span class="line">    currentPoint = sourceStartingPoint + currentT .* deltas;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,82" id="srcline82"> 82</a></span><span class="line">    endingT = tMax;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,83" id="srcline83"> 83</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,84" id="srcline84"> 84</a></span><span class="line">    <span class="comment">% have starting point and end point, now will find which voxels and with</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,85" id="srcline85"> 85</a></span><span class="line">    <span class="comment">% what distances across each voxel the ray travels</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,86" id="srcline86"> 86</a></span><span class="line">           </span></span>
+<span class="srcline"><span class="lineno"><a href="1,87" id="srcline87"> 87</a></span><span class="line">    isVoxelDim0 = (voxelDimsInM == 0);</span></span>
+<span class="srcline"><span class="lineno"><a href="1,88" id="srcline88"> 88</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,89" id="srcline89"> 89</a></span><span class="line">    isDelta0 = (deltas == 0);</span></span>
+<span class="srcline"><span class="lineno"><a href="1,90" id="srcline90"> 90</a></span><span class="line">    isDeltaNeg = (deltas &lt; 0);</span></span>
+<span class="srcline"><span class="lineno"><a href="1,91" id="srcline91"> 91</a></span><span class="line">    invVoxelDims = 1 ./ voxelDimsInM;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,92" id="srcline92"> 92</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,93" id="srcline93"> 93</a></span><span class="line">    nextLatticeAdder = sign(deltas) .* [1 -1 -1];</span></span>
+<span class="srcline"><span class="lineno"><a href="1,94" id="srcline94"> 94</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,95" id="srcline95"> 95</a></span><span class="line">    latticeToIndex = isDeltaNeg;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,96" id="srcline96"> 96</a></span><span class="line">    latticeToIndex(1) = ~latticeToIndex(1);</span></span>
+<span class="srcline"><span class="lineno"><a href="1,97" id="srcline97"> 97</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,98" id="srcline98"> 98</a></span><span class="line">    latticeToIndex(isDelta0) = 1; <span class="comment">%needs to be, since we always floor to find the lattice for delta == 0</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,99" id="srcline99"> 99</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,100" id="srcline100">100</a></span><span class="line">    while endingT - currentT &gt; Constants.Round_Off_Error_Bound</span></span>
+<span class="srcline"><span class="lineno"><a href="1,101" id="srcline101">101</a></span><span class="line">        currentLattices = getLattices(currentPoint, invVoxelDims, isVoxelDim0, isDeltaNeg, isDelta0);</span></span>
+<span class="srcline"><span class="lineno"><a href="1,102" id="srcline102">102</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,103" id="srcline103">103</a></span><span class="line">        nextLattices = currentLattices + nextLatticeAdder;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,104" id="srcline104">104</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,105" id="srcline105">105</a></span><span class="line">        tValsForNextLattices = ((nextLattices .* voxelDimsInM .* [1 -1 -1]) - sourceStartingPoint) .* invDeltas;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,106" id="srcline106">106</a></span><span class="line">                </span></span>
+<span class="srcline"><span class="lineno"><a href="1,107" id="srcline107">107</a></span><span class="line">        nextT = min(tValsForNextLattices(~isDelta0));</span></span>
+<span class="srcline"><span class="lineno"><a href="1,108" id="srcline108">108</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,109" id="srcline109">109</a></span><span class="line">        nextPoint = sourceStartingPoint + nextT .* deltas;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,110" id="srcline110">110</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,111" id="srcline111">111</a></span><span class="line">        length = norm(currentPoint - nextPoint);</span></span>
+<span class="srcline"><span class="lineno"><a href="1,112" id="srcline112">112</a></span><span class="line">        indices = currentLattices + latticeToIndex;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,113" id="srcline113">113</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,114" id="srcline114">114</a></span><span class="line">        relativeElectronDensity = phantomData(indices(2), indices(1), indices(3));</span></span>
+<span class="srcline"><span class="lineno"><a href="1,115" id="srcline115">115</a></span><span class="line">                </span></span>
+<span class="srcline"><span class="lineno"><a href="1,116" id="srcline116">116</a></span><span class="line">        currentT = nextT;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,117" id="srcline117">117</a></span><span class="line">        currentPoint = nextPoint;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,118" id="srcline118">118</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,119" id="srcline119">119</a></span><span class="line">        if currentT &lt;= tCrossover <span class="comment">% in the source-to-iso area</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,120" id="srcline120">120</a></span><span class="line">            waterEquivDoseSourceToIso = waterEquivDoseSourceToIso + length .* relativeElectronDensity;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,121" id="srcline121">121</a></span><span class="line">        else <span class="comment">% in the iso-to-EPID area</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,122" id="srcline122">122</a></span><span class="line">            waterEquivDoseIsoToEpid = waterEquivDoseIsoToEpid + length .* relativeElectronDensity;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,123" id="srcline123">123</a></span><span class="line">        end</span></span>
+<span class="srcline"><span class="lineno"><a href="1,124" id="srcline124">124</a></span><span class="line">              </span></span>
+<span class="srcline"><span class="lineno"><a href="1,125" id="srcline125">125</a></span><span class="line">    end</span></span>
+<span class="srcline"><span class="lineno"><a href="1,126" id="srcline126">126</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,127" id="srcline127">127</a></span><span class="line">end</span></span>
+<span class="srcline"><span class="lineno"><a href="1,128" id="srcline128">128</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="1,129" id="srcline129">129</a></span><span class="line">end</span></span>
 </pre>
 </div>
 <pre class="code">
-<span class="srcline"><span class="lineno"><a href="1,131" id="srcline131">131</a></span><span class="line"></span></span>
-<span class="srcline"><span class="lineno"><a href="1,132" id="srcline132">132</a></span><span class="line"><span class="comment">% ** HELPER FUNCTIONS **</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,133" id="srcline133">133</a></span><span class="line"></span></span>
-<span class="srcline"><span class="lineno"><a href="1,134" id="srcline134">134</a></span><span class="line"><span class="keyword">function</span> <span class="var type1" id="S54T2U581">lattices</span> = getLattices(<span class="var type1" id="S55T2U584">point</span>, <span class="var type1" id="S56T2U585">invVoxelDims</span>, <span class="var type1" id="S57T7U586">isVoxelDim0</span>, <span class="var type1" id="S58T7U587">isDeltaNeg</span>, <span class="var type1" id="S59T7U588">isDelta0</span>)</span></span>
-<span class="srcline"><span class="lineno"><a href="1,135" id="srcline135">135</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,136" id="srcline136">136</a></span><span class="line">    <span class="mxinfo " id="T2:U7"><span class="var type1" id="S60T2U591">unroundedVals</span> = <span class="mxinfo " id="T2:U9"><span class="var type1" id="S55T2U593">point</span> .* <span class="var type1" id="S56T2U594">invVoxelDims</span></span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,137" id="srcline137">137</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,138" id="srcline138">138</a></span><span class="line">    <span class="mxinfo " id="T2:U12"><span class="var type1" id="S60T2U597">unroundedVals</span> = <span class="mxinfo " id="T2:U14"><span class="mxinfo " id="T2:U15">[<span class="mxinfo " id="T1:U16">1</span> <span class="mxinfo " id="T1:U17">-1</span> <span class="mxinfo " id="T1:U18">-1</span>]</span>.*<span class="var type1" id="S60T2U606">unroundedVals</span></span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,139" id="srcline139">139</a></span><span class="line">            </span></span>
-<span class="srcline"><span class="lineno"><a href="1,140" id="srcline140">140</a></span><span class="line">    <span class="comment">% first need to kill off any rounding errors</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,141" id="srcline141">141</a></span><span class="line">    <span class="mxinfo " id="T2:U20"><span class="var type1" id="S60T2U609">unroundedVals</span> = <span class="mxinfo " id="T2:U22"><span class="fcn" id="F77N6:B611">roundToLevel</span>(<span class="var type1" id="S60T2U612">unroundedVals</span>, Constants.Round_Off_Level)</span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,142" id="srcline142">142</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,143" id="srcline143">143</a></span><span class="line">    <span class="comment">% no round to get lattice/index values</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,144" id="srcline144">144</a></span><span class="line">    <span class="mxinfo " id="T9:U24"><span class="mxinfo " id="T9:U25"><span class="var type1" id="S58T7U619">isDeltaNeg</span>(<span class="mxinfo " id="T4:U27">1</span>)</span> = <span class="mxinfo " id="T9:U28">~<span class="mxinfo " id="T9:U29"><span class="var type1" id="S58T7U623">isDeltaNeg</span>(<span class="mxinfo " id="T4:U31">1</span>)</span></span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,145" id="srcline145">145</a></span><span class="line">    <span class="mxinfo " id="T7:U32"><span class="var type1" id="S63T7U627">selectFloor</span> = <span class="mxinfo " id="T7:U34"><span class="var type1" id="S58T7U629">isDeltaNeg</span> | <span class="var type1" id="S59T7U630">isDelta0</span></span></span>; <span class="comment">% ceiling if delta is positive ONLY</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,146" id="srcline146">146</a></span><span class="line">        </span></span>
-<span class="srcline"><span class="lineno"><a href="1,147" id="srcline147">147</a></span><span class="line">    <span class="mxinfo " id="T8:U37"><span class="var type1" id="S64T8U633">floorVals</span> = <span class="mxinfo " id="T8:U39">floor(<span class="mxinfo " id="T8:U40"><span class="var type1" id="S60T2U637">unroundedVals</span>(<span class="var type1" id="S63T7U638">selectFloor</span>)</span>)</span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,148" id="srcline148">148</a></span><span class="line">    <span class="mxinfo " id="T8:U43"><span class="var type1" id="S66T8U641">ceilVals</span> = <span class="mxinfo " id="T8:U45">ceil(<span class="mxinfo " id="T8:U46"><span class="var type1" id="S60T2U645">unroundedVals</span>(<span class="mxinfo " id="T7:U48">~<span class="var type1" id="S63T7U647">selectFloor</span></span>)</span>)</span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,149" id="srcline149">149</a></span><span class="line">     </span></span>
-<span class="srcline"><span class="lineno"><a href="1,150" id="srcline150">150</a></span><span class="line">    <span class="mxinfo " id="T2:U50"><span class="var type1" id="S54T2U650">lattices</span> =  <span class="mxinfo " id="T2:U52">zeros(<span class="mxinfo " id="T1:U53">1</span>,<span class="mxinfo " id="T1:U54">3</span>)</span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,151" id="srcline151">151</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,152" id="srcline152">152</a></span><span class="line">    <span class="mxinfo " id="T8:U55"><span class="mxinfo " id="T8:U56"><span class="var type1" id="S54T2U658">lattices</span>(<span class="var type1" id="S63T7U659">selectFloor</span>)</span> = <span class="var type1" id="S64T8U660">floorVals</span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,153" id="srcline153">153</a></span><span class="line">    <span class="mxinfo " id="T8:U60"><span class="mxinfo " id="T8:U61"><span class="var type1" id="S54T2U664">lattices</span>(<span class="mxinfo " id="T7:U63">~<span class="var type1" id="S63T7U666">selectFloor</span></span>)</span> = <span class="var type1" id="S66T8U667">ceilVals</span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,154" id="srcline154">154</a></span><span class="line">    <span class="mxinfo " id="T8:U66"><span class="mxinfo " id="T8:U67"><span class="var type1" id="S54T2U671">lattices</span>(<span class="var type1" id="S57T7U672">isVoxelDim0</span>)</span> = <span class="mxinfo " id="T1:U70">0</span></span>;</span></span>
-<span class="srcline"><span class="lineno"><a href="1,155" id="srcline155">155</a></span><span class="line"><span class="keyword">end</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,156" id="srcline156">156</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="1,130" id="srcline130">130</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="1,131" id="srcline131">131</a></span><span class="line"><span class="comment">% ** HELPER FUNCTIONS **</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,132" id="srcline132">132</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="1,133" id="srcline133">133</a></span><span class="line"><span class="keyword">function</span> <span class="var type1" id="S54T2U575">lattices</span> = getLattices(<span class="var type1" id="S55T2U578">point</span>, <span class="var type1" id="S56T2U579">invVoxelDims</span>, <span class="var type1" id="S57T7U580">isVoxelDim0</span>, <span class="var type1" id="S58T7U581">isDeltaNeg</span>, <span class="var type1" id="S59T7U582">isDelta0</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="1,134" id="srcline134">134</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,135" id="srcline135">135</a></span><span class="line">    <span class="mxinfo " id="T2:U7"><span class="var type1" id="S60T2U585">unroundedVals</span> = <span class="mxinfo " id="T2:U9"><span class="var type1" id="S55T2U587">point</span> .* <span class="var type1" id="S56T2U588">invVoxelDims</span></span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,136" id="srcline136">136</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,137" id="srcline137">137</a></span><span class="line">    <span class="mxinfo " id="T2:U12"><span class="var type1" id="S60T2U591">unroundedVals</span> = <span class="mxinfo " id="T2:U14"><span class="mxinfo " id="T2:U15">[<span class="mxinfo " id="T1:U16">1</span> <span class="mxinfo " id="T1:U17">-1</span> <span class="mxinfo " id="T1:U18">-1</span>]</span>.*<span class="var type1" id="S60T2U600">unroundedVals</span></span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,138" id="srcline138">138</a></span><span class="line">            </span></span>
+<span class="srcline"><span class="lineno"><a href="1,139" id="srcline139">139</a></span><span class="line">    <span class="comment">% first need to kill off any rounding errors</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,140" id="srcline140">140</a></span><span class="line">    <span class="mxinfo " id="T2:U20"><span class="var type1" id="S60T2U603">unroundedVals</span> = <span class="mxinfo " id="T2:U22"><span class="fcn" id="F77N6:B605">roundToLevel</span>(<span class="var type1" id="S60T2U606">unroundedVals</span>, Constants.Round_Off_Level)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,141" id="srcline141">141</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,142" id="srcline142">142</a></span><span class="line">    <span class="comment">% no round to get lattice/index values</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,143" id="srcline143">143</a></span><span class="line">    <span class="mxinfo " id="T9:U24"><span class="mxinfo " id="T9:U25"><span class="var type1" id="S58T7U613">isDeltaNeg</span>(<span class="mxinfo " id="T4:U27">1</span>)</span> = <span class="mxinfo " id="T9:U28">~<span class="mxinfo " id="T9:U29"><span class="var type1" id="S58T7U617">isDeltaNeg</span>(<span class="mxinfo " id="T4:U31">1</span>)</span></span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,144" id="srcline144">144</a></span><span class="line">    <span class="mxinfo " id="T7:U32"><span class="var type1" id="S63T7U621">selectFloor</span> = <span class="mxinfo " id="T7:U34"><span class="var type1" id="S58T7U623">isDeltaNeg</span> | <span class="var type1" id="S59T7U624">isDelta0</span></span></span>; <span class="comment">% ceiling if delta is positive ONLY</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,145" id="srcline145">145</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,146" id="srcline146">146</a></span><span class="line">    <span class="mxinfo " id="T8:U37"><span class="var type1" id="S64T8U627">floorVals</span> = <span class="mxinfo " id="T8:U39">floor(<span class="mxinfo " id="T8:U40"><span class="var type1" id="S60T2U631">unroundedVals</span>(<span class="var type1" id="S63T7U632">selectFloor</span>)</span>)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,147" id="srcline147">147</a></span><span class="line">    <span class="mxinfo " id="T8:U43"><span class="var type1" id="S66T8U635">ceilVals</span> = <span class="mxinfo " id="T8:U45">ceil(<span class="mxinfo " id="T8:U46"><span class="var type1" id="S60T2U639">unroundedVals</span>(<span class="mxinfo " id="T7:U48">~<span class="var type1" id="S63T7U641">selectFloor</span></span>)</span>)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,148" id="srcline148">148</a></span><span class="line">     </span></span>
+<span class="srcline"><span class="lineno"><a href="1,149" id="srcline149">149</a></span><span class="line">    <span class="mxinfo " id="T2:U50"><span class="var type1" id="S54T2U644">lattices</span> =  <span class="mxinfo " id="T2:U52">zeros(<span class="mxinfo " id="T1:U53">1</span>,<span class="mxinfo " id="T1:U54">3</span>)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,150" id="srcline150">150</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,151" id="srcline151">151</a></span><span class="line">    <span class="mxinfo " id="T8:U55"><span class="mxinfo " id="T8:U56"><span class="var type1" id="S54T2U652">lattices</span>(<span class="var type1" id="S63T7U653">selectFloor</span>)</span> = <span class="var type1" id="S64T8U654">floorVals</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,152" id="srcline152">152</a></span><span class="line">    <span class="mxinfo " id="T8:U60"><span class="mxinfo " id="T8:U61"><span class="var type1" id="S54T2U658">lattices</span>(<span class="mxinfo " id="T7:U63">~<span class="var type1" id="S63T7U660">selectFloor</span></span>)</span> = <span class="var type1" id="S66T8U661">ceilVals</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,153" id="srcline153">153</a></span><span class="line">    <span class="mxinfo " id="T8:U66"><span class="mxinfo " id="T8:U67"><span class="var type1" id="S54T2U665">lattices</span>(<span class="var type1" id="S57T7U666">isVoxelDim0</span>)</span> = <span class="mxinfo " id="T1:U70">0</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,154" id="srcline154">154</a></span><span class="line"><span class="keyword">end</span></span></span>
+<span class="srcline"><span class="lineno"><a href="1,155" id="srcline155">155</a></span><span class="line"></span></span>
 </pre>
 <div class="dead">
 <pre class="code">
-<span class="srcline"><span class="lineno"><a href="1,157" id="srcline157">157</a></span><span class="line">function roundedValues = roundToLevel(unroundedValues, level)</span></span>
-<span class="srcline"><span class="lineno"><a href="1,158" id="srcline158">158</a></span><span class="line">    roundedValues = floor((unroundedValues.*(10^level)) + 0.5).*(10^(-level));</span></span>
-<span class="srcline"><span class="lineno"><a href="1,159" id="srcline159">159</a></span><span class="line">end</span></span>
-<span class="srcline"><span class="lineno"><a href="1,160" id="srcline160">160</a></span><span class="line"> </span></span>
+<span class="srcline"><span class="lineno"><a href="1,156" id="srcline156">156</a></span><span class="line">function roundedValues = roundToLevel(unroundedValues, level)</span></span>
+<span class="srcline"><span class="lineno"><a href="1,157" id="srcline157">157</a></span><span class="line">    roundedValues = floor((unroundedValues.*(10^level)) + 0.5).*(10^(-level));</span></span>
+<span class="srcline"><span class="lineno"><a href="1,158" id="srcline158">158</a></span><span class="line">end</span></span>
+<span class="srcline"><span class="lineno"><a href="1,159" id="srcline159">159</a></span><span class="line"> </span></span>
 </pre>
 </div>
 </body>
