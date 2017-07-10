@@ -1,20 +1,21 @@
-function [ DOSE_NOCORR, PatDoseConv ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso, EPID,tps)
+function [ DOSE_NOCORR, PatDoseConv ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso)
    %UNTITLED2 Summary of this function goes here
     %   Detailed explanation goes here
 
     %% Prepare Patient EPIDs and TPS
 try
-%     PatientEPIDdir = uigetdir();
+    PatientEPIDdir = uigetdir();
 %     disp(PatientEPIDdir)
-%     EPID = EPIDprep(PatientEPIDdir);
+    EPID = EPIDprep(PatientEPIDdir);
 
-%     [TPS_dosemap_name, path] = uigetfile('*.dcm');
-%     TPS_dosemap_name = [path TPS_dosemap_name];
-%     tps=dicomread(TPS_dosemap_name); 
-%     tps_info=dicominfo(TPS_dosemap_name); 
-%     tps=double(tps);
-%     nFractions = 3; %Figure this out later
-%     tps=100*tps*tps_info.DoseGridScaling/nFractions;
+    [TPS_dosemap_name, path] = uigetfile('*.dcm');
+    TPS_dosemap_name = [path TPS_dosemap_name];
+    tps=dicomread(TPS_dosemap_name); 
+    tps_info=dicominfo(TPS_dosemap_name); 
+    tps=double(tps);
+%     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
+    nFractions = 23;
+    tps=100*tps*tps_info.DoseGridScaling/nFractions;
 
 
     %% Adjusts the EPIDs for left-right and superior-inferior displacement.
@@ -59,6 +60,7 @@ try
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
     load('CommissionedVariables.mat');
+    TPRmatInt = TPRint;
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -97,14 +99,14 @@ try
     Flindex = round((l-Fl_s(1))/0.1)+1;
     
     outLow = Fwindex < 1;
-    outHigh = Fwindex > length(Fw_s);
+    outHigh = Fwindex > size(FmatInt,1);
     Fwindex(outLow) = 1;
-    Fwindex(outHigh) = length(Fw_s);
+    Fwindex(outHigh) = size(FmatInt,1);
     
     if Flindex < 1
         Flindex = 1;
-    elseif Flindex > length(Fl_s)
-        Flindex = length(Fl_s);
+    elseif Flindex > size(FmatInt,2)
+        Flindex = size(FmatInt,2);
     end
     
     
@@ -112,14 +114,14 @@ try
     flindex = round((l-fl_s(1))/0.1)+1;
     
     outLow = fdindex < 1;
-    outHigh = fdindex > length(fd_s);
+    outHigh = fdindex > size(fmatInt,1);
     fdindex(outLow) = 1;
-    fdindex(outHigh) = length(fd_s);
+    fdindex(outHigh) = size(FmatInt,1);
     
     if flindex < 1
         flindex = 1;
-    elseif flindex > length(fl_s)
-        flindex = length(fl_s);
+    elseif flindex > size(FmatInt,2)
+        flindex = size(FmatInt,2);
     end
     
     TPRlindex = round((l-TPRfields(1))/0.1)+1;
@@ -127,31 +129,25 @@ try
     TPRwdindex = round((w_map./2-d_map-TPRdepth(1))/0.1)+1;
     
     outLow = TPRlindex < 1;
-    outHigh = TPRlindex > length(TPRfields);
+    outHigh = TPRlindex > size(TPRmatInt,2);
     TPRlindex(outLow) = 1;
-    TPRlindex(outHigh) = length(TPRfields);
+    TPRlindex(outHigh) = size(TPRmatInt,2);
     
     outLow = TPRwindex < 1;
-    outHigh = TPRwindex > length(TPRdepth);
+    outHigh = TPRwindex > size(TPRmatInt,1);
     TPRwindex(outLow) = 1;
-    TPRwindex(outHigh) = length(TPRdepth);
+    TPRwindex(outHigh) = size(TPRmatInt,1);
     
     outLow = TPRwdindex < 1;
-    outHigh = TPRwdindex > length(TPRdepth);
+    outHigh = TPRwdindex > size(TPRmatInt,1);
     TPRwdindex(outLow) = 1;
-    TPRwdindex(outHigh) = length(TPRdepth);
+    TPRwdindex(outHigh) = size(TPRmatInt,1);
     
     F_map = FmatInt(Fwindex,Flindex);
     F_map = reshape(F_map,384,512);
 
-    
-    
     f_map = fmatInt(fdindex,flindex);
     f_map = reshape(f_map,384,512);
-
-    %%%
-    TPRmatInt = TPRint;
-    %%%
     
     TPR1 = TPRmatInt(TPRwdindex,TPRlindex);
     TPR1 = reshape(TPR1, 384, 512);
@@ -176,8 +172,10 @@ try
     %Convolving
     PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
     
-    figure; imagesc((DOSE_NOCORR-tps)./tps);
-    figure; imagesc((PatDoseConv-tps)./tps);
+    figure; imagesc((DOSE_NOCORR-tps)./tps*100);
+    colorbar; set(gca, 'CLim', [-10 10]);
+    figure; imagesc((PatDoseConv-tps)./tps*100);
+    colorbar; set(gca, 'CLim', [-10 10]);
 catch ME
     save 'PatCalcFail2'
     rethrow(ME)
