@@ -3,26 +3,26 @@ function [  ] = RITEDosCommission( TPSdir, Fdir,fdir, ECLIPSEs, EPIDsF,EPIDsf )
 %   Detailed explanation goes here
 
 %% Get dirs
-% disp('TPS')
-% TPSdir = uigetdir();
-% disp('Fdir')
-% Fdir = uigetdir();
-% disp('fdir')
-% fdir = uigetdir();
+disp('TPS')
+TPSdir = uigetdir();
+disp('Fdir')
+Fdir = uigetdir();
+disp('fdir')
+fdir = uigetdir();
 [TPRname, path] = uigetfile();
 
 TPR = load([path TPRname]);
 TPR=TPR.temp;
+size2 = size(TPR,2);
 %To get rid of NaNs
 TPR = TPR(~isnan(TPR));
-TPR = reshape(TPR,[],16);
+TPR = reshape(TPR,[],size2);
 
 %% Commission
 % [ECLIPSEs, EPIDsF, EPIDsf] = EPIDgen(TPSdir,Fdir,fdir);
 
 FMATRIX = makeBigF(ECLIPSEs, TPSdir, EPIDsF);
 fmat = makeSmallf(fdir,EPIDsf);
-assignin('base','fmat',fmat)
 
 % Probably pull these from the files later
 l_s = 5:5:20;
