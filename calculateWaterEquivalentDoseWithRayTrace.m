@@ -110,8 +110,8 @@ indices = makeIndices(numAngles, epidDetectorDims(1), epidDetectorDims(2));
     ctVoxelDimsInM, ctDataLocationInM, ctDataSet,...
     sadInM, axisToEpidInM);
 
-waterEquivDose_SourceToIsocentre = reshape(waterEquivDose_SourceToIsocentre, epidDetectorDims);
-waterEquivDose_IsocentreToEPID = reshape(waterEquivDose_IsocentreToEPID, epidDetectorDims);
+waterEquivDose_SourceToIsocentre = flipud(reshape(waterEquivDose_SourceToIsocentre, epidDetectorDims));
+waterEquivDose_IsocentreToEPID = flipud(reshape(waterEquivDose_IsocentreToEPID, epidDetectorDims));
 
 
 end
