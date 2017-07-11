@@ -8,9 +8,9 @@ function [ FmatInt, fmatInt, TPRmatInt ] = InterpMatrices( Fmatrix, fmatrix, w_s
 [fdq, flq] = meshgrid(min(d_s):0.1:max(d_s), min(l_s):0.1:max(l_s));
 [TPRdepthq, TPRfieldsq] = meshgrid(min(TPRdepth):0.1:max(TPRdepth),min(TPRfields):0.1:max(TPRfields));
 
-FmatInt = griddata(Fw,Fl,Fmatrix',Fwq,Flq)';
-fmatInt = griddata(fd, fl, fmatrix', fdq, flq)';
-TPRmatInt = griddata(TPRdepth2,TPRfields2,TPRmatrix',TPRdepthq,TPRfieldsq)';
+FmatInt = griddata(Fw,Fl,Fmatrix',Fwq,Flq,'v4')';
+fmatInt = griddata(fd, fl, fmatrix', fdq, flq,'v4')';
+TPRmatInt = griddata(TPRdepth2,TPRfields2,TPRmatrix',TPRdepthq,TPRfieldsq,'v4')';
 
 end
 

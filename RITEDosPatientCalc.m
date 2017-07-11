@@ -1,21 +1,21 @@
-function [ DOSE_NOCORR, PatDoseConv ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso)
+function [ DOSE_NOCORR, PatDoseConv,tps ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso, EPID, tps)
    %UNTITLED2 Summary of this function goes here
     %   Detailed explanation goes here
 
     %% Prepare Patient EPIDs and TPS
 try
-    PatientEPIDdir = uigetdir();
-%     disp(PatientEPIDdir)
-    EPID = EPIDprep(PatientEPIDdir);
+%     PatientEPIDdir = uigetdir();
+% %     disp(PatientEPIDdir)
+%     EPID = EPIDprep(PatientEPIDdir);
 
-    [TPS_dosemap_name, path] = uigetfile('*.dcm');
-    TPS_dosemap_name = [path TPS_dosemap_name];
-    tps=dicomread(TPS_dosemap_name); 
-    tps_info=dicominfo(TPS_dosemap_name); 
-    tps=double(tps);
-%     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-    nFractions = 23;
-    tps=100*tps*tps_info.DoseGridScaling/nFractions;
+%     [TPS_dosemap_name, path] = uigetfile('*.dcm');
+%     TPS_dosemap_name = [path TPS_dosemap_name];
+%     tps=dicomread(TPS_dosemap_name); 
+%     tps_info=dicominfo(TPS_dosemap_name); 
+%     tps=double(tps);
+% %     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
+%     nFractions = 23;
+%     tps=100*tps*tps_info.DoseGridScaling/nFractions;
 
 
     %% Adjusts the EPIDs for left-right and superior-inferior displacement.
@@ -41,13 +41,12 @@ try
     epid_mask=+(EPID>abs(epid_64_max+epid_64_min)/4);
 
 
-    l_tps=round(sqrt(nnz(mask_tps)*0.05227*0.05227));
-    l_epid=round(sqrt(nnz(epid_mask)*0.05227*0.05227));
+    l_tps=sqrt(nnz(mask_tps)*0.05227*0.05227);
+    l_epid=sqrt(nnz(epid_mask)*0.05227*0.05227);
 
     if abs(l_tps - l_epid) > 1
         disp('Field sizes of the treatment planning system and EPID images taken do not seem to match')
-    else
-        l=l_epid;
+        disp('Results may be affected.')
     end
     
     % May also have an option to override when l's don't match.
@@ -60,8 +59,7 @@ try
     % Will include the F, f, and TPR arrays
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
-    load('CommissionedVariables.mat');
-    TPRmatInt = TPRint;
+    load('CommissioningNoShift.mat');
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -86,10 +84,13 @@ try
         w_map = w_map';
         d_map = d_map';
     end
-    w_map = fliplr(w_map);
-    d_map = fliplr(d_map);
-    w_map = circshift(w_map,-5,1);
-    d_map = circshift(d_map,-5,1);
+    
+    % Keep this until you remake the WEDs
+%     w_map = fliplr(w_map);
+%     d_map = fliplr(d_map);
+    %
+%     w_map = circshift(w_map,-5,1);
+%     d_map = circshift(d_map,-5,1);
     w = mean2(w_map(189:196,253:260));
     
     Fl_s = 5:5:20;

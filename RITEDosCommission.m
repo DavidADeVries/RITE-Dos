@@ -3,12 +3,12 @@ function [  ] = RITEDosCommission( TPSdir, Fdir,fdir, ECLIPSEs, EPIDsF,EPIDsf )
 %   Detailed explanation goes here
 
 %% Get dirs
-disp('TPS')
-TPSdir = uigetdir();
-disp('Fdir')
-Fdir = uigetdir();
-disp('fdir')
-fdir = uigetdir();
+% disp('TPS')
+% TPSdir = uigetdir();
+% disp('Fdir')
+% Fdir = uigetdir();
+% disp('fdir')
+% fdir = uigetdir();
 [TPRname, path] = uigetfile();
 
 TPR = load([path TPRname]);
@@ -31,9 +31,9 @@ d_s = -10:5:10;
 TPRdepth = [0:0.5:20 21:30];
 TPRfields = 5:20;
 
-[FmatInt,fmatInt,TPRint] = InterpMatrices(FMATRIX, fmat, w_s, l_s, d_s, TPR, TPRdepth, TPRfields);
+[FmatInt,fmatInt,TPRmatInt] = InterpMatrices(FMATRIX, fmat, w_s, l_s, d_s, TPR, TPRdepth, TPRfields);
 
-[ws_in, ws_cr, DoseConvs] = makeGaussianCorr(ECLIPSEs, EPIDsF, TPRint, FmatInt,fmatInt);
+[ws_in, ws_cr, DoseConvs] = makeGaussianCorr(ECLIPSEs, EPIDsF, TPRmatInt, FmatInt,fmatInt);
 
 %% Save results
 % saveloc = uigetdir();
@@ -42,7 +42,7 @@ TPRfields = 5:20;
 weights = cat(3,ws_in,ws_cr);
 % weightsave = input('Name for Gaussian Weights: ');
 
-save('firsttest.mat','FmatInt','fmatInt','TPRint','weights');
+save('CommissioningNoShift.mat','FmatInt','fmatInt','TPRmatInt','weights');
 % Also save the l_s, w_s, and d_s since it's useful in patient calc.
 
 
