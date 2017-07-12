@@ -1,4 +1,4 @@
-function [ ws_cr, ws_in, DoseConvs ] = makeGaussianCorrTogether( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
+function [ ws_cr, ws_in, DoseConvs, HCM ] = makeGaussianCorrTogether( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 SD1 = 1.7;
@@ -54,18 +54,18 @@ for i=1:size(EPIDsF,3)
     
     mask_diff = mask-mask_eclipse;
     
-    epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
-    epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
-    
-    epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
-    epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));
+%     epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
+%     epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
+%     
+%     epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
+%     epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));
     
     %Just for test purposes
     % EPID_sag_cm=[epidsagSImagn*.05 epidsagLRmagn*.05];
     
     
-    shiftEPIDsF = circshift(EPIDsF(:,:,i), [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
-    
+%     shiftEPIDsF = circshift(EPIDsF(:,:,i), [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
+    shiftEPIDsF = EPIDsF(:,:,i);
     epid_elements=sort(shiftEPIDsF(:),'descend');
     epid_64_max=mean(epid_elements(101:151));
     epid_64_min=mean(epid_elements(end-150:end-100));
@@ -169,7 +169,7 @@ end
 %     figure()
 %     imagesc((EPIDsF(:,:,i)./F_map-ECLIPSEs(:,:,i))./ECLIPSEs(:,:,i)*100)
     
-%     HCM(:,:,i) = makeGHC(DoseConv, ECLIPSEs(:,:,i), l);
+    HCM(:,:,i) = makeGHC(DoseConv, ECLIPSEs(:,:,i), l);
 %     
 %     tps_profile=ECLIPSEs(192,:,i);
 %     doseconv_profile = DoseConv(192,:).*HCM(192,:,i);

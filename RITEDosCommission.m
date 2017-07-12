@@ -33,7 +33,7 @@ TPRfields = 5:20;
 
 [FmatInt,fmatInt,TPRmatInt] = InterpMatrices(FMATRIX, fmat, w_s, l_s, d_s, TPR, TPRdepth, TPRfields);
 
-[ws_in, ws_cr, DoseConvs] = makeGaussianCorr(ECLIPSEs, EPIDsF, TPRmatInt, FmatInt,fmatInt);
+[ws_in, ws_cr, DoseConvs, HCM] = makeGaussianCorr(ECLIPSEs, EPIDsF, TPRmatInt, FmatInt,fmatInt);
 
 %% Save results
 % saveloc = uigetdir();
@@ -41,8 +41,9 @@ TPRfields = 5:20;
 % fsave = input('Name for f matrix: ');
 weights = cat(3,ws_in,ws_cr);
 % weightsave = input('Name for Gaussian Weights: ');
+fmatInt(101,:)=1;
 
-save('CommissioningNoShift.mat','FmatInt','fmatInt','TPRmatInt','weights');
+save('CommissioningHCM300PM.mat','FmatInt','fmatInt','TPRmatInt','weights', 'HCM');
 % Also save the l_s, w_s, and d_s since it's useful in patient calc.
 
 

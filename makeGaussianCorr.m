@@ -1,4 +1,4 @@
-function [ ws_cr, ws_in, DoseConvs ] = makeGaussianCorr( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
+function [ ws_in, ws_cr, DoseConvs, HCM ] = makeGaussianCorr( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 SD1 = 1.7;
@@ -18,7 +18,7 @@ g4 = gauss_distribution(x,m,SD4/.523);
 
 %Should horns be BSCed? If so, do this outside and pass EPIDs in after
 %having been corrected.
-% HCM = zeros(size(EPIDsF));
+HCM = zeros(size(EPIDsF));
 DoseConvs = zeros(size(EPIDsF));
 % ConvRescaleFactors_cross = zeros(1,size(EPIDsF,3));
 % ConvRescaleFactors_in = zeros(1,size(EPIDsF,3));
@@ -47,7 +47,7 @@ for i=1:size(EPIDsF,3)
     %% Adjusts the EPIDs for left-right and superior-inferior displacement.
     epid_max = mean2(EPIDsF(189:196,253:260,i));
     epid_min = mean2(EPIDsF(1:8,1:8,i));
-    mask = (EPIDsF(:,:,i) > abs(epid_max+epid_min)/4);
+    mask = (EPIDsF(:,:,i) > abs(epid_max+epid_min)/2);
     
     eclipse_max = mean2(ECLIPSEs(189:196,253:260,i));
     mask_eclipse = (ECLIPSEs(:,:,i)>abs(eclipse_max)/2);
@@ -66,10 +66,10 @@ for i=1:size(EPIDsF,3)
     
 %     shiftEPIDsF = circshift(EPIDsF(:,:,i), [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
     shiftEPIDsF = EPIDsF(:,:,i);
-    epid_elements=sort(shiftEPIDsF,'descend');
-    epid_64_max=mean(epid_elements(1:64));
+    epid_elements=sort(shiftEPIDsF(:),'descend');
+    epid_64_max=mean(epid_elements(101:151));
     epid_64_min=mean(epid_elements(end-150:end-100));
-    mask_epid=+(shiftEPIDsF>abs(epid_64_max+epid_64_min)/4);
+    mask_epid=+(shiftEPIDsF>abs(epid_64_max+epid_64_min)/2);
     %% In-plane gaussian
     [w_in,ConvRescaleFactor_in]=Fit2GaussConv(shiftEPIDsF(:,256)',ECLIPSEs(:,256,i)',SD1,SD2,SD3,SD4);
 
@@ -137,7 +137,7 @@ for i=1:size(EPIDsF,3)
 %     figure()
 %     imagesc((EPIDsF(:,:,i)./F_map-ECLIPSEs(:,:,i))./ECLIPSEs(:,:,i)*100)
     
-%     HCM(:,:,i) = makeGHC(DoseConv, ECLIPSEs(:,:,i), l);
+    HCM(:,:,i) = makeGHC(DoseConv, ECLIPSEs(:,:,i), l);
 %     
 %     tps_profile=ECLIPSEs(192,:,i);
 %     doseconv_profile = DoseConv(192,:).*HCM(192,:,i);

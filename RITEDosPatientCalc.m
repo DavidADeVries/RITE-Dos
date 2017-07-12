@@ -1,28 +1,28 @@
-function [ DOSE_NOCORR, PatDoseConv,tps ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso, EPID, tps)
+function [ DOSE_NOCORR, PatDoseConv,tps,HCM_map ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso, EPID, tps)
    %UNTITLED2 Summary of this function goes here
     %   Detailed explanation goes here
 
     %% Prepare Patient EPIDs and TPS
 try
-%     PatientEPIDdir = uigetdir();
-% %     disp(PatientEPIDdir)
-%     EPID = EPIDprep(PatientEPIDdir);
+    PatientEPIDdir = uigetdir();
+    disp(PatientEPIDdir)
+    EPID = EPIDprep(PatientEPIDdir);
 
-%     [TPS_dosemap_name, path] = uigetfile('*.dcm');
-%     TPS_dosemap_name = [path TPS_dosemap_name];
-%     tps=dicomread(TPS_dosemap_name); 
-%     tps_info=dicominfo(TPS_dosemap_name); 
-%     tps=double(tps);
-% %     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-%     nFractions = 23;
-%     tps=100*tps*tps_info.DoseGridScaling/nFractions;
+    [TPS_dosemap_name, path] = uigetfile('*.dcm');
+    TPS_dosemap_name = [path TPS_dosemap_name];
+    tps=dicomread(TPS_dosemap_name); 
+    tps_info=dicominfo(TPS_dosemap_name); 
+    tps=double(tps);
+%     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
+    nFractions = 23;
+    tps=100*tps*tps_info.DoseGridScaling/nFractions;
 
 
     %% Adjusts the EPIDs for left-right and superior-inferior displacement.
     epid_elements=sort(EPID(:),'descend');
     epid_64_max=mean(epid_elements(101:151));
     epid_64_min=mean(epid_elements(end-150:end-100));
-    mask=+(EPID>abs(epid_64_max+epid_64_min)/4);
+    mask=+(EPID>abs(epid_64_max+epid_64_min)/2);
 
     tps_64_max=sort(tps(:),'descend');
     tps_64_max=mean(tps_64_max(101:151));
@@ -38,7 +38,7 @@ try
 % 
 %     EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
 
-    epid_mask=+(EPID>abs(epid_64_max+epid_64_min)/4);
+    epid_mask=EPID>abs(epid_64_max+epid_64_min)/2;
 
 
     l_tps=sqrt(nnz(mask_tps)*0.05227*0.05227);
@@ -59,7 +59,7 @@ try
     % Will include the F, f, and TPR arrays
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
-    load('CommissioningNoShift.mat');
+    load('CommissioningHCM300PM.mat');
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -91,7 +91,8 @@ try
     %
 %     w_map = circshift(w_map,-5,1);
 %     d_map = circshift(d_map,-5,1);
-    w = mean2(w_map(189:196,253:260));
+    w = mean2(w_map(189:196,253:260))
+    w = mean2(w_map(epid_mask))
     
     Fl_s = 5:5:20;
     Fw_s = 5:5:40;
@@ -168,6 +169,7 @@ try
     [ l_close, wlindex ] = min(abs(Fl_s - l));
     w_in = weights(:,(wwindex-1)*length(Fl_s)+wlindex,1);
     w_cr = weights(:,(wwindex-1)*length(Fl_s)+wlindex,2);
+    HCM_map = HCM(:,:,(wwindex-1)*length(Fl_s)+wlindex);
     
     gsumcr=(w_cr(1)*g1+w_cr(2)*g2+w_cr(3)*g3+w_cr(4)*g4)/trapz(w_cr(1)*g1+w_cr(2)*g2+w_cr(3)*g3+w_cr(4)*g4);
     gsumin=(w_in(1)*g1+w_in(2)*g2+w_in(3)*g3+w_in(4)*g4)/trapz(w_in(1)*g1+w_in(2)*g2+w_in(3)*g3+w_in(4)*g4);
@@ -178,7 +180,7 @@ try
     tpscax = mean2(tps(189:196,253:260));
     nocorrcax = (mean2(DOSE_NOCORR(189:196,253:260))-tpscax)./tpscax*100;
     %Convolving
-    PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
+    PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map).*HCM_map;
     convcax = (mean2(PatDoseConv(189:196,253:260))-tpscax)/tpscax*100;
     
     figure; imagesc((DOSE_NOCORR-tps)./tps*100); title(['% dose diff, NO CORR (CAX = ' num2str(nocorrcax) ')']);
