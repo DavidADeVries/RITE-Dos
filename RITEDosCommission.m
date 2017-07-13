@@ -41,9 +41,9 @@ TPRfields = 5:20;
 % fsave = input('Name for f matrix: ');
 weights = cat(3,ws_in,ws_cr);
 % weightsave = input('Name for Gaussian Weights: ');
-fmatInt(101,:)=1;
+% fmatInt(101,:)=1;
 
-save('CommissioningHCM300PM.mat','FmatInt','fmatInt','TPRmatInt','weights', 'HCM');
+save('CommissioningFullOpt.mat','FmatInt','fmatInt','TPRmatInt','weights', 'HCM');
 % Also save the l_s, w_s, and d_s since it's useful in patient calc.
 
 

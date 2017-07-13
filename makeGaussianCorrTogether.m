@@ -1,4 +1,4 @@
-function [ ws_cr, ws_in, DoseConvs, HCM ] = makeGaussianCorrTogether( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
+function [ ws_in, ws_cr, DoseConvs, HCM ] = makeGaussianCorrTogether( ECLIPSEs, EPIDsF, TMRratio, FmatInt,fmatInt )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 SD1 = 1.7;
@@ -152,7 +152,7 @@ end
 %%
     DoseConv = getDoseConv(shiftEPIDsF,mask_epid,gsumcr,gsumin,TMRratio,F_map,fmap);
     DOSE_NOCORR = shiftEPIDsF./F_map;
-    DoseConv = DoseConv * (mean2(DOSE_NOCORR(189:196,253:260))./mean2(DoseConv(189:196,253:260)));
+%     DoseConv = DoseConv * (mean2(DOSE_NOCORR(189:196,253:260))./mean2(DoseConv(189:196,253:260)));
     DoseConvs(:,:,i) = DoseConv;
 %     doseconv_profile = DoseConv(192,:);
 %     figure; plot(1:length(doseconv_profile),doseconv_profile,1:length(doseconv_profile),tps_profile,1:length(doseconv_profile),EPIDsF(192,:,i)./F_map(192,:));

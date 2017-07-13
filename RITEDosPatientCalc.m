@@ -14,7 +14,8 @@ try
     tps_info=dicominfo(TPS_dosemap_name); 
     tps=double(tps);
 %     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-    nFractions = 23;
+%     nFractions = 23;
+    nFractions = 1;
     tps=100*tps*tps_info.DoseGridScaling/nFractions;
 
 
@@ -22,7 +23,7 @@ try
     epid_elements=sort(EPID(:),'descend');
     epid_64_max=mean(epid_elements(101:151));
     epid_64_min=mean(epid_elements(end-150:end-100));
-    mask=+(EPID>abs(epid_64_max+epid_64_min)/2);
+    mask=EPID>abs(epid_64_max+epid_64_min)/2;
 
     tps_64_max=sort(tps(:),'descend');
     tps_64_max=mean(tps_64_max(101:151));
@@ -78,7 +79,7 @@ try
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
     
-    d_map=(WEDiso2epid-WEDsource2iso)*Constants.m_to_cm;
+    d_map=(WEDiso2epid-WEDsource2iso)/2*Constants.m_to_cm;
     
     if size(w_map,1) > size(w_map,2)
         w_map = w_map';
@@ -91,8 +92,8 @@ try
     %
 %     w_map = circshift(w_map,-5,1);
 %     d_map = circshift(d_map,-5,1);
-    w = mean2(w_map(189:196,253:260))
-    w = mean2(w_map(epid_mask))
+    w = mean2(w_map(189:196,253:260));
+    w = mean2(w_map(epid_mask));
     
     Fl_s = 5:5:20;
     Fw_s = 5:5:40;
@@ -180,7 +181,7 @@ try
     tpscax = mean2(tps(189:196,253:260));
     nocorrcax = (mean2(DOSE_NOCORR(189:196,253:260))-tpscax)./tpscax*100;
     %Convolving
-    PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map).*HCM_map;
+    PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
     convcax = (mean2(PatDoseConv(189:196,253:260))-tpscax)/tpscax*100;
     
     figure; imagesc((DOSE_NOCORR-tps)./tps*100); title(['% dose diff, NO CORR (CAX = ' num2str(nocorrcax) ')']);
