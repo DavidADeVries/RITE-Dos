@@ -1,4 +1,4 @@
-function [ DOSE_NOCORR, PatDoseConv,tps,HCM_map ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso, EPID, tps)
+function [ DOSE_NOCORR, PatDoseConv,tps,HCM_map ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso, nFractions, EPID, tps)
    %UNTITLED2 Summary of this function goes here
     %   Detailed explanation goes here
 
@@ -15,7 +15,7 @@ try
     tps=double(tps);
 %     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
 %     nFractions = 23;
-    nFractions = 1;
+%     nFractions = 1;
     tps=100*tps*tps_info.DoseGridScaling/nFractions;
 
 
@@ -78,21 +78,17 @@ try
 %     WEDiso2epid = 10*ones(384,512)/100;
 
     w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
-    
+%     w_map=imgaussfilt(w_map,10);
     d_map=(WEDiso2epid-WEDsource2iso)/2*Constants.m_to_cm;
-    
+%     d_map=imgaussfilt(d_map,10);
     if size(w_map,1) > size(w_map,2)
         w_map = w_map';
         d_map = d_map';
     end
     
-    % Keep this until you remake the WEDs
-%     w_map = fliplr(w_map);
-%     d_map = fliplr(d_map);
-    %
 %     w_map = circshift(w_map,-5,1);
 %     d_map = circshift(d_map,-5,1);
-    w = mean2(w_map(189:196,253:260));
+%     w = mean2(w_map(189:196,253:260));
     w = mean2(w_map(epid_mask));
     
     Fl_s = 5:5:20;
@@ -177,7 +173,7 @@ try
 
     %% Create Patient Dose maps
     % Before convolution
-    DOSE_NOCORR=epid_mask.*EPID.*TPRR_map.*f_map./F_map;
+    DOSE_NOCORR=epid_mask.*EPID.*TPRR_map./f_map./F_map;
     tpscax = mean2(tps(189:196,253:260));
     nocorrcax = (mean2(DOSE_NOCORR(189:196,253:260))-tpscax)./tpscax*100;
     %Convolving
