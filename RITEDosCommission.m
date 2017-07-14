@@ -43,7 +43,7 @@ weights = cat(3,ws_in,ws_cr);
 % weightsave = input('Name for Gaussian Weights: ');
 % fmatInt(101,:)=1;
 
-save('CommissioningFullOpt.mat','FmatInt','fmatInt','TPRmatInt','weights', 'HCM');
+save('CommissioningBlur.mat','FmatInt','fmatInt','TPRmatInt','weights', 'HCM');
 % Also save the l_s, w_s, and d_s since it's useful in patient calc.
 
 

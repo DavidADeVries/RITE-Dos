@@ -7,6 +7,7 @@ try
     PatientEPIDdir = uigetdir();
     disp(PatientEPIDdir)
     EPID = EPIDprep(PatientEPIDdir);
+    
 
     [TPS_dosemap_name, path] = uigetfile('*.dcm');
     TPS_dosemap_name = [path TPS_dosemap_name];
@@ -42,6 +43,7 @@ try
     epid_mask=EPID>abs(epid_64_max+epid_64_min)/2;
 
 
+    EPID(mask) = imgaussfilt(EPID(mask),10);
     l_tps=sqrt(nnz(mask_tps)*0.05227*0.05227);
     l_epid=sqrt(nnz(epid_mask)*0.05227*0.05227);
 
@@ -60,7 +62,7 @@ try
     % Will include the F, f, and TPR arrays
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
-    load('CommissioningHCM300PM.mat');
+    load('CommissioningBlur.mat');
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -88,8 +90,8 @@ try
     
 %     w_map = circshift(w_map,-5,1);
 %     d_map = circshift(d_map,-5,1);
-%     w = mean2(w_map(189:196,253:260));
-    w = mean2(w_map(epid_mask));
+    w = mean2(w_map(189:196,253:260));
+%     w = mean2(w_map(epid_mask));
     
     Fl_s = 5:5:20;
     Fw_s = 5:5:40;
