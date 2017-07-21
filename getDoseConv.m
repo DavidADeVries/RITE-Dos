@@ -61,7 +61,7 @@ for col=1:512;
 end
 
 %%        CALCULATE DOSE WITH CONVOLUTION EDGE CORRECTION
-DoseConv=mask.*conv_2.*TMRratio./f_map./F_map;
+DoseConv=mask.*conv_2.*TMRratio.*f_map./F_map;
 
 end
 

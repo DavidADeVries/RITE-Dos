@@ -12,7 +12,6 @@ for i=1:length(TPSnames)
 end
 disp('done TPS')
 Fnames = dir([Fdir '\w*']);
-assignin('base','names',Fnames)
 EPIDsF = zeros(384,512,length(Fnames));
 for j=1:length(Fnames)
     disp(['F: ' num2str(j)]);

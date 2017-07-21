@@ -8,7 +8,8 @@ try
     disp(PatientEPIDdir)
     EPID = EPIDprep(PatientEPIDdir);
     
-
+%     EPID = imgaussfilt(EPID,10);
+    
     [TPS_dosemap_name, path] = uigetfile('*.dcm');
     TPS_dosemap_name = [path TPS_dosemap_name];
     tps=dicomread(TPS_dosemap_name); 
@@ -43,7 +44,7 @@ try
     epid_mask=EPID>abs(epid_64_max+epid_64_min)/2;
 
 
-    EPID(mask) = imgaussfilt(EPID(mask),10);
+%     EPID(mask) = imgaussfilt(EPID(mask),10);
     l_tps=sqrt(nnz(mask_tps)*0.05227*0.05227);
     l_epid=sqrt(nnz(epid_mask)*0.05227*0.05227);
 
@@ -53,7 +54,7 @@ try
     end
     
     % May also have an option to override when l's don't match.
-    l=l_epid;
+    l=l_epid
 
 
 
@@ -62,7 +63,7 @@ try
     % Will include the F, f, and TPR arrays
     % and the w_s, l_s, d_s, and depths the data was taken at.
     % Gaussian weights
-    load('CommissioningBlur.mat');
+    load('CommissioningFixedfmaybe.mat');
 
     g1 = gauss_distribution(1:1000,500,1.7/.523);
     g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -175,7 +176,7 @@ try
 
     %% Create Patient Dose maps
     % Before convolution
-    DOSE_NOCORR=epid_mask.*EPID.*TPRR_map./f_map./F_map;
+    DOSE_NOCORR=epid_mask.*EPID.*TPRR_map.*f_map./F_map;
     tpscax = mean2(tps(189:196,253:260));
     nocorrcax = (mean2(DOSE_NOCORR(189:196,253:260))-tpscax)./tpscax*100;
     %Convolving
