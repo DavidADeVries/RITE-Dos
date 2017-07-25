@@ -80,10 +80,7 @@ try
         d_map = d_map';
     end
     w = mean2(w_map(189:196,253:260));
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % d_map is out of the bounds, ie -10 to 10. Probably calculating it
-    % incorrectly but ask Stefano on Monday.
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     Fl_s = 5:5:20;
     Fw_s = 5:5:40;
     fl_s = Fl_s;
