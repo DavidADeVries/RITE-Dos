@@ -67,6 +67,8 @@ ctDataSet(equalTo0) = 1;
 ctDataSet(below0) = (ctDataSet(below0) - redIntercepts(1)) ./ redSlopes(1);
 ctDataSet(above0) = (ctDataSet(above0) - redIntercepts(2)) ./ redSlopes(2);
 
+ctDataSet(ctDataSet<0) = 0; % set below zero to zero
+
 % ***************************
 % PREPARE RAY TRACE VARIABLES
 % ***************************
