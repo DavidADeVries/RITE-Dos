@@ -55,6 +55,7 @@ end
 % ***************************
 
 equalTo0 = (ctDataSet == 0);
+belowCutoff = (ctDataSet <= Constants.Air_HU_Cutoff);
 below0 = (ctDataSet < 0);
 above0 = (ctDataSet > 0);
 
@@ -67,7 +68,7 @@ ctDataSet(equalTo0) = 1;
 ctDataSet(below0) = (ctDataSet(below0) - redIntercepts(1)) ./ redSlopes(1);
 ctDataSet(above0) = (ctDataSet(above0) - redIntercepts(2)) ./ redSlopes(2);
 
-ctDataSet(ctDataSet<0) = 0; % set below zero to zero
+ctDataSet(belowCutoff) = 0; % set below cutoff to zero
 
 % ***************************
 % PREPARE RAY TRACE VARIABLES
