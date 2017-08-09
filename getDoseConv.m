@@ -7,9 +7,9 @@ conv_1=zeros(384,512);
 for row=1:384;
     
 %   GIVE THEM RELATIVE WEIGHTS
-    normfactor=trapz(epid(row,:));
+%     normfactor=trapz(epid(row,:));
     
-    profile=epid(row,:)/normfactor;
+    profile=epid(row,:);%/normfactor;
     conv_1(row,:)=conv(profile,gsumcr,'same');
     
     % Now that I gave correct shape, I must renormalize to the correct height.
@@ -34,10 +34,10 @@ end
 conv_2=zeros(384,512);
 for col=1:512;
 %   GIVE THEM RELATIVE WEIGHTS
-    normfactor=trapz(conv_1(:,col));
+%     normfactor=trapz(conv_1(:,col));
 
     
-    profile=conv_1(:,col)/normfactor;
+    profile=conv_1(:,col);%/normfactor;
     %conv_2(:,col)=conv(profile,gsum,'same');
     conv_2(:,col)=conv(profile,gsumin,'same');
 

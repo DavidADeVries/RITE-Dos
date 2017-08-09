@@ -55,8 +55,8 @@ estimates = fminsearchbnd(model, start_point, [0 0 0 0], [],options); estimates 
          c=secondmax;
          d=index4;
          %sse= sum(abs(ErrorVector([([a:b,c:d])])));
-         sse= sum((ErrorVector([([a:b,c:d])])).^2);
-       %  sse= sum(ErrorVector([a:d]).^2);
+%          sse= sum((ErrorVector([([a:b,c:d])])).^2);
+        sse= sum(ErrorVector([a:d]).^2);
          SumSquares=sse;
 
     end
