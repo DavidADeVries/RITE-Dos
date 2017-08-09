@@ -82,10 +82,6 @@ w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
 %     w_map=imgaussfilt(w_map,10);
 d_map=(WEDiso2epid-WEDsource2iso)/2*Constants.m_to_cm;
 %     d_map=imgaussfilt(d_map,10);
-if size(w_map,1) > size(w_map,2)
-    w_map = w_map';
-    d_map = d_map';
-end
 
 %     w_map = circshift(w_map,-5,1);
 %     d_map = circshift(d_map,-5,1);
