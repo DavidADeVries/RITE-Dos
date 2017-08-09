@@ -4,6 +4,8 @@ classdef Constants
     properties (Constant)
         Use_Mex_Code = true; % set true for C code speed-up
         
+        Air_HU_Cutoff = -900; % HU
+        
         Source_To_Axis_Distance_In_Cm = 100;
         Axis_To_EPID_Distance_In_Cm = 50;
         
