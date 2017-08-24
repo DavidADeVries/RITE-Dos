@@ -1,10 +1,25 @@
-function [ DOSE_NOCORR, PatDoseConv,tps,HCM_map ] = RITEDosPatientCalc( WEDiso2epid, WEDsource2iso, nFractions, EPID, tps)
-   %UNTITLED2 Summary of this function goes here
-    %   Detailed explanation goes here
+function [ DOSE_NOCORR, PatDoseConv,tps,HCM_map ] = RITEDosPatientCalc( 
+    addpath(genpath(pwd));
+%% Parameter entry
+% Enter the various l's (field sizes), w's (solid water thicknesses), and
+% the depths and field sizes used in the TPR data.
+Fl_s = 5:5:20;
+Fw_s = 5:5:40;
+fl_s = Fl_s;
+fd_s = -10:5:10;
+TPRdepth = [0:0.5:20 21:30];
+TPRfields = 5:20;
+% File commissioning data is to be pulled from.
+CommissFile = 'CommissioningResults.mat';
+% Gantry angle and number of fractions
+gantAngle = 0;
+nFractions = 1;
 
+
+    
+    
 %% Prepare Patient EPIDs and TPS
-PatientEPIDdir = uigetdir();
-disp(PatientEPIDdir)
+PatientEPIDdir = uigetdir(pwd,'Select Patient EPID directory');
 EPID = EPIDprep(PatientEPIDdir);
 
 %     EPID = imgaussfilt(EPID,10);
@@ -14,9 +29,7 @@ TPS_dosemap_name = [path TPS_dosemap_name];
 tps=dicomread(TPS_dosemap_name); 
 tps_info=dicominfo(TPS_dosemap_name); 
 tps=double(tps);
-%     nFractions=tps_info.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-%     nFractions = 23;
-%     nFractions = 1;
+
 tps=100*tps*tps_info.DoseGridScaling/nFractions;
 
 
@@ -30,15 +43,7 @@ tps_64_max=sort(tps(:),'descend');
 tps_64_max=mean(tps_64_max(101:151));
 mask_tps=+(tps>abs(tps_64_max)*.5);
 
-mask_diff = double(mask)-double(mask_tps);
-% 
-%     epidsagSImagn=abs(sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256)))/2;
-%     epidsagSIsign=sign((sum(mask_diff(1:192,256))-sum(mask_diff(193:384,256))));
-% 
-%     epidsagLRmagn=abs(sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512)))/2;
-%     epidsagLRsign=sign((sum(mask_diff(192,1:256))-sum(mask_diff(192,257:512))));    
-% 
-%     EPID = circshift(EPID, [round(epidsagSIsign*epidsagSImagn) round(epidsagLRsign*epidsagLRmagn)]);   
+mask_diff = double(mask)-double(mask_tps);   
 
 epid_mask=EPID>abs(epid_64_max+epid_64_min)/2;
 
@@ -53,16 +58,14 @@ if abs(l_tps - l_epid) > 1
 end
 
 % May also have an option to override when l's don't match.
-l=l_epid
+l=l_epid;
 
 
 
 
 %% Load commissioning data
-% Will include the F, f, and TPR arrays
-% and the w_s, l_s, d_s, and depths the data was taken at.
-% Gaussian weights
-load('CommissioningFixedfmaybe.mat');
+
+load(CommissFile);
 
 g1 = gauss_distribution(1:1000,500,1.7/.523);
 g2 = gauss_distribution(1:1000,500,1.7*2/.523);
@@ -71,11 +74,8 @@ g4 = gauss_distribution(1:1000,500,1.7*30/.523);
 
 %% Get patient w, l, and d map from CT (DAVID)
 
-% Choose RT plan file
-%     plan=dicominfo(planfile(1).name);
-%     nFractions=plan.FractionGroupSequence.Item_1.NumberOfFractionsPlanned;
-%     CTdir = uigetdir();
-%     [WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, 0);
+CTdir = uigetdir();
+[WEDsource2iso, WEDiso2epid] = calculateWaterEquivalentDoseWithRayTrace(CTdir, gantAngle);
 
 
 w_map=(WEDsource2iso+WEDiso2epid)*Constants.m_to_cm;
@@ -89,13 +89,6 @@ w = mean2(w_map(189:196,253:260));
 
 %     w = mean2(w_map(epid_mask));
 
-
-Fl_s = 5:5:20;
-Fw_s = 5:5:40;
-fl_s = Fl_s;
-fd_s = -10:5:10;
-TPRdepth = [0:0.5:20 21:30];
-TPRfields = 5:20;
 
 %% Construct F, f, and TPR maps from w, l, and d
 
@@ -178,13 +171,15 @@ nocorrcax = (mean2(DOSE_NOCORR(189:196,253:260))-tpscax)./tpscax*100;
 %Convolving
 PatDoseConv = getDoseConv(EPID,epid_mask,gsumcr,gsumin,TPRR_map,F_map,f_map);
 convcax = (mean2(PatDoseConv(189:196,253:260))-tpscax)/tpscax*100;
+PatDoseConvHCM = PatDoseConv.*HCM_map;
+HCMcax = (mean2(PatDoseConvHCM(189:196,253:260))-tpscax)/tpscax*100;
 
-figure; imagesc((DOSE_NOCORR-tps)./tps*100); title(['% dose diff, NO CORR (CAX = ' num2str(nocorrcax) ')']);
-colorbar; set(gca, 'CLim', [-15 15]); colormap jet; axis equal; axis tight;
-figure; imagesc((PatDoseConv-tps)./tps*100); title(['% dose diff, CONV CORR (CAX = ' num2str(convcax) ')']);
-colorbar; set(gca, 'CLim', [-15 15]); colormap jet; axis equal; axis tight;
-
-convcax;
+figure; imagesc((DOSE_NOCORR-tps)./max(tps(:))*100); title(['% dose diff relative to TPS max, NO CORR (CAX = ' num2str(nocorrcax) ')']);
+colorbar; set(gca, 'CLim', [-5 5]); colormap jet; axis equal; axis tight;
+figure; imagesc((PatDoseConv-tps)./max(tps(:))*100); title(['% dose diff relative to TPS max, CONV CORR (CAX = ' num2str(convcax) ')']);
+colorbar; set(gca, 'CLim', [-5 5]); colormap jet; axis equal; axis tight;
+figure; imagesc((PatDoseConvHCM-tps)./max(tps(:))*100); title(['% dose diff relative to TPS max, CONV CORR with HCM (CAX = ' num2str(HCMcax) ')']);
+colorbar; set(gca, 'CLim', [-5 5]); colormap jet; axis equal; axis tight;
 
 end
 
