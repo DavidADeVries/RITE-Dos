@@ -6,7 +6,9 @@ classdef CommissionedEnergy
     properties
         energyInMeV = 6 % MeV
         
+        tissueMaximumRatios = {} % not from RITE-Dos!
         
+        commissioningEpidResults = {} % cell array of CommissioningEpidResult
     end
     
     methods
