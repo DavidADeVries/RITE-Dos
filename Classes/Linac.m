@@ -8,10 +8,14 @@ classdef Linac
         name
         
         epidDims = [512 384] % num pixels [xy, z]
-        epidPixelDimsInCm = [0.0784 0.0784] % cm
+        epidPixelDimsInCm = [0.0784 0.0784] % cm [xy, z]
         
         sourceToIsocentreDistanceInCm = 100 % cm
-        isocentroToEpidDistanceInCm = 50 % cm
+        isocentreToEpidDistanceInCm = 50 % cm
+        
+        commissioningMUs
+        
+        notes = ''
         
         commissionedEnergies = {} % cell array of CommissionedEnergy
     end

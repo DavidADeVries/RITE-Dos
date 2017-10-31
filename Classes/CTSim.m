@@ -13,6 +13,8 @@ classdef CTSim
         above0_redCurveSlope = 1709.81 %HU/RED
         
         airCutoffInHU = -900 % HU
+        
+        notes = ''
     end
     
     methods
