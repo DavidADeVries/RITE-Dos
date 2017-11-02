@@ -1,5 +1,4 @@
-function [ DOSE_NOCORR, PatDoseConv,tps,HCM_map ] = RITEDosPatientCalc( 
-    addpath(genpath(pwd));
+function [ DOSE_NOCORR, PatDoseConv,tps,HCM_map ] = RITEDosPatientCalc(addpath(genpath(pwd));
 %% Parameter entry
 % Enter the various l's (field sizes), w's (solid water thicknesses), and
 % the depths and field sizes used in the TPR data.
