@@ -5,6 +5,7 @@ classdef CommissionedEnergy
     
     properties
         energyInMeV = 6 % MeV
+        doseRateInMUsPerSecond = 400 %MU/s
         
         notes = ''
         
@@ -17,6 +18,13 @@ classdef CommissionedEnergy
     end
     
     methods
+        function name = getName(this)
+            name = [...
+                num2str(this.energyInMeV),...
+                'MeV @ ',...
+                num2str(this.doseRateInMUsPerSecond),...
+                'MU/s'];
+        end
     end
     
 end
