@@ -2,8 +2,12 @@ classdef Constants
     %Constants
     
     properties (Constant)
+        % ** NEW **
+        SMALL_F_EPID_DIRECTORY = 'Small f Commissioning Data (EPID)'
+        BIG_F_EPID_DIRECTORY = 'Big F Commissioning Data (EPID)'
+        BIG_F_TPS_DIRECTORY = 'Big F Commissioning Data (TPS)'
         
-        
+        % ** EXISTING
         Use_Mex_Code = true; % set true for C code speed-up
         
         Air_HU_Cutoff = -900; % HU

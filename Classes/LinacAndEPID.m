@@ -21,6 +21,9 @@ classdef LinacAndEPID
         notes = ''
         
         commissionedEnergies = {} % cell array of CommissionedEnergy
+        
+        commissionedEnergyBeingEdited = CommissionedEnergy.empty
+        commissionedEnergyBeingEditedIndex = 1 %index for cell array
     end
     
     properties (Constant)
@@ -32,6 +35,10 @@ classdef LinacAndEPID
             data = load(filePath);
             
             this = data.(LinacAndEPID.varName);
+            
+            % default drop down
+            this.commissionedEnergyBeingEdited = CommissionedEnergy.empty;
+            this.commissionedEnergyBeingEditedIndex = 1;
         end
     end
     
@@ -129,6 +136,8 @@ classdef LinacAndEPID
             
             if numEnergies == 0
                 app.Linac_CommissionedEnergiesDropDown.Items = {};
+                app.Linac_CommissionedEnergiesDropDown.ItemsData = [];
+                
                 app.Linac_CommissionedEnergiesDropDown.Enable = 'off';
                 
                 app.Linac_CommissionedEnergiesEditButton.Enable = 'off';
@@ -136,12 +145,15 @@ classdef LinacAndEPID
                 items = cell(numEnergies,1);
                 
                 for i=1:numEnergies
-                    items{i} = this.commissionedEnergies{i}.getName();
-                    
+                    items{i} = this.commissionedEnergies{i}.getName();                    
                 end
+                
+                itemsData = 1:numEnergies;
                     
                 app.Linac_CommissionedEnergiesDropDown.Items = items;
+                app.Linac_CommissionedEnergiesDropDown.ItemsData = itemsData;
                 app.Linac_CommissionedEnergiesDropDown.Enable = 'on';
+                app.Linac_CommissionedEnergiesDropDown.Value = this.commissionedEnergyBeingEditedIndex;
                 
                 app.Linac_CommissionedEnergiesEditButton.Enable = 'on';
             end
@@ -152,7 +164,44 @@ classdef LinacAndEPID
             
             save(filePath, this.varName);
         end
+        
+        function this = saveEnergyBeingEdited(this, linacAndEpidLoadPath)
+            energies = this.commissionedEnergies;
+            
+            if this.commissionedEnergyBeingEditedIndex == 0 % is new
+                energies{length(energies)+1} = this.commissionedEnergyBeingEdited;
+                this.commissionedEnergyBeingEditedIndex = length(energies);
+            else
+                energies{this.commissionedEnergyBeingEditedIndex} = this.commissionedEnergyBeingEdited;
+            end
+            
+            % re-sort according to MeV, then dose rate
+            sortMatrix = getEnergiesSortMatrix(energies);
+            
+            [~,index] = sortrows(sortMatrix);
+            
+            energies = energies(index);
+            
+            this.commissionedEnergyBeingEditedIndex = index(this.commissionedEnergyBeingEditedIndex);
+            this.commissionedEnergies = energies;
+            
+            this.saveToFile(linacAndEpidLoadPath);
+        end
     end
     
 end
 
+% HELPER FUNCTIONS
+
+        
+function sortMatrix = getEnergiesSortMatrix(energies)
+
+numEnergies = length(energies);
+
+sortMatrix = zeros(numEnergies, 2);
+
+for i=1:numEnergies
+    sortMatrix(i,1) = energies{i}.energyInMeV;
+    sortMatrix(i,2) = energies{i}.doseRateInMUsPerMinute;
+end
+end
