@@ -35,6 +35,11 @@ classdef Constants
         
         deg_to_rad = (pi/180);
         rad_to_deg = (180/pi);
+        
+        cGy_to_Gy = (100/1);
+        
+        % FILE EXTENSIONS
+        DICOM_FILE_EXT = '.dcm';
     end
     
     methods

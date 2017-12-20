@@ -7,7 +7,7 @@ classdef LinacAndEPID
     properties
         name = ''
         
-        epidDims = [512 384] % num pixels [xy, z]
+        epidDims = [512 384] % num pixels [xy/crossplane, z/inplane]
         epidPixelDimsInCm = [0.0784 0.0784] % cm [xy, z]
         
         epidIntegratedImaging = true % T/F, F for continuous imagiing
@@ -169,6 +169,7 @@ classdef LinacAndEPID
             energies = this.commissionedEnergies;
             
             if this.commissionedEnergyBeingEditedIndex == 0 % is new
+                this.commissionedEnergyBeingEdited.addedToLinacAndEpid = true; 
                 energies{length(energies)+1} = this.commissionedEnergyBeingEdited;
                 this.commissionedEnergyBeingEditedIndex = length(energies);
             else

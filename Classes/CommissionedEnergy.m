@@ -10,7 +10,7 @@ classdef CommissionedEnergy
         
         notes = ''
         
-        fieldSizesInCm = 5:5:50 % cm
+        fieldSizesInCm = 5:5:20 % cm
         phantomWidthsInCm = 5:5:40 % cm
         
         phantomShiftsInCm = -10:5:10 % cm
@@ -22,6 +22,14 @@ classdef CommissionedEnergy
         addedToLinacAndEpid = false %T/F, set to T after being first saved
         
         tissuePhantomRatioPath = ''
+        tissuePhantomRatioData = [];
+        
+        % commissioning results
+        matrix_F = []
+        matrix_f = []
+        matrix_Tpr = []
+        matrix_hornCorrection = []
+        gaussionWeights = []
     end
     
     methods
@@ -89,7 +97,7 @@ classdef CommissionedEnergy
             % only allow commissioning calculation if directories are
             % created (assume they are filled), and a TPR data file is
             % chosen
-            if this.commissioningDataDirectoriesCreated && ~isempty(this.tissuePhantomRatioPath)
+            if this.commissioningDataDirectoriesCreated && ~isempty(this.tissuePhantomRatioData)
                 app.Beam_Edit_CommissioningCalculateAndSaveButton.Enable = 'on';
             else
                 app.Beam_Edit_CommissioningCalculateAndSaveButton.Enable = 'off';
@@ -166,6 +174,79 @@ classdef CommissionedEnergy
                     mkdir(tpsPath, makeDataFolderName(l, w, d));
                 end
             end
+        end
+        
+        function this = loadTissuePhantomRatioData(this)
+            data = csvread(this.tissuePhantomRatioPath);
+            
+            this.tissuePhantomRatioData = data;
+        end
+        
+        function fieldSizes = getTprFieldSizesInCm(this)
+            fieldSizes = this.tissuePhantomRatioData(1,2:end);
+        end
+        
+        function depths = getTprDepthsInCm(this)
+            depths = this.tissuePhantomRatioData(2:end,1);
+            depths = depths';
+        end
+        
+        function data = getTprData(this)
+            data = this.tissuePhantomRatioData(2:end,2:end);
+        end
+        
+        function path = getSmallFEpidPath(this)
+            path = makePath(this.commissioningDataPath, Constants.SMALL_F_EPID_DIRECTORY);
+        end
+        
+        function path = getBigFEpidPath(this)
+            path = makePath(this.commissioningDataPath, Constants.BIG_F_EPID_DIRECTORY);
+        end
+        
+        function path = getBigFTpsPath(this)
+            path = makePath(this.commissioningDataPath, Constants.BIG_F_TPS_DIRECTORY);
+        end
+                
+        function this = commissionEnergy(this, linacAndEpid, appSettings)
+            % load-up EPID data
+            [tpsValues, epidData_F, epidData_f] = EPIDgen(...
+                this.getBigFTpsPath, this.getBigFEpidPath(), this.getSmallFEpidPath(),...
+                linacAndEpid.epidDims,...
+                this.phantomWidthsInCm, this.fieldSizesInCm,...
+                this.phantomShiftsInCm, this.phantomWidthForShiftsInCm,...
+                appSettings);
+            
+            % calculate F and f matrices
+            mat_F = makeBigF(...
+                tpsValues, epidData_F,...
+                this.phantomWidthsInCm, this.fieldSizesInCm,...
+                linacAndEpid.epidDims, appSettings);
+            
+            mat_f = makeSmallf(...
+                epidData_f,...
+                this.fieldSizesInCm, this.phantomShiftsInCm,...
+                linacAndEpid.epidDims, appSettings);
+            
+            % interpolate matrices
+            [matInt_F, matInt_f, matInt_Tpr] = InterpMatrices(...
+                mat_F, mat_f,...
+                this.phantomWidthsInCm, this.fieldSizesInCm, this.phantomShiftsInCm,...
+                this.getTprData(), this.getTprDepthsInCm(), this.getTprFieldSizesInCm(),...
+                appSettings.interpolationGridSpacingForCommissioningInCm);
+            
+            % find Gaussian weights
+            [ws_in, ws_cr, ~, mat_hornCorr] = makeGaussianCorr(...
+                tpsValues, epidData_F, matInt_F,...
+                this.epidDims, this.fieldSizesInCm, this.phantomWidthsInCm,...
+                appSettings);
+            weights = cat(3,ws_in,ws_cr);
+            
+            % add to commissioned energy
+            this.matrix_F = matInt_F;
+            this.matrix_f = matInt_f;
+            this.matrix_Tpr = matInt_Tpr;
+            this.matrix_HornCorrection = mat_hornCorr;
+            this.gaussianWeights = weights;            
         end
     end
     

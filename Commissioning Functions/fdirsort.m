@@ -1,8 +1,10 @@
 function [ fdirssorted ] = fdirsort( fdirs )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
+
 len = str2num(fdirs(1,2:3)); %#ok<*ST2NM>
 last = 1;
+
 for i=2:length(fdirs)
     if str2num(fdirs(i,2:3)) ~= len
         sorted = sort(str2num(fdirs(last:i-1,5:7)));
@@ -30,8 +32,10 @@ for i=2:length(fdirs)
         len = str2num(fdirs(i,2:3));
     end
 end
+
 sorted = sort(str2num(fdirs(last:i,5:7)));
 ins = char(zeros(length(sorted),3));
+
 for j=1:length(sorted)
     if sorted(j) > 0
         if sorted(j) < 10
@@ -50,6 +54,7 @@ for j=1:length(sorted)
         end
     end
 end
+
 fdirs(last:i,5:7) = ins;
 fdirssorted = fdirs;
 

@@ -1,31 +1,100 @@
-function [ ECLIPSEs, EPIDsF, EPIDsf ] = EPIDgen( TPSdir, Fdir, fdir )
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
+function [tpsValues, epidData_F, epidData_f] = EPIDgen(tpsPath, bigFPath, smallFPath, epidDims, w_s, l_s, d_s, w_forShifts, settings)
+%[tpsValues, epidData_F, epidData_f] = EPIDgen(tpsPath, bigFPath, smallFPath, epidDims, w_s, l_s, d_s, w_forShifts, settings)
 
-TPSnames = dir([TPSdir '\w*.dcm']);
+% ** TPS VALUES READ-IN **
 
-ECLIPSEs = zeros(384,512,length(TPSnames));
-TPSinfo = dicominfo([TPSdir '\' TPSnames(1).name]);
-DoseScale = TPSinfo.DoseGridScaling;
-for i=1:length(TPSnames)
-    ECLIPSEs(:,:,i) = 100*DoseScale*double(dicomread([TPSdir '\' TPSnames(i).name]));
-end
-disp('done TPS')
-Fnames = dir([Fdir '\w*']);
-EPIDsF = zeros(384,512,length(Fnames));
-for j=1:length(Fnames)
-    disp(['F: ' num2str(j)]);
-    EPIDsF(:,:,j) = EPIDprep([Fdir '\' Fnames(j).name]);
+wLen = length(w_s);
+lLen = length(l_s);
+
+numEclipseValues = wLen * lLen;
+
+tpsValues = zeros(epidDims(2), epidDims(1), numEclipseValues);
+
+d = 0;
+
+for l_i=1:1:lLen
+    l = l_s(l_i);
+    
+    for w_i=1:1:wLen
+        w = w_s(w_i);
+        
+        path = makePath(tpsPath, makeDataFolderName(l,w,d));
+        
+        fileNames = getDicomFileNames(path);
+        
+        if length(fileNames) ~= 1
+            error(['No/multiple DICOM file(s) found at: ', path]);
+        else
+            dicomValue = double(dicomread(makePath(path, fileNames{1})));
+            dicomInfo = dicominfo(makePath(path, fileNames{1}));
+            doseScale = dicomInfo.(settings.doseGridScalingFieldName);
+            
+            tpsValues(:,:,((w_i-1)*wLen)+l_i) = Constants.cGy_to_Gy*doseScale*dicomValue;
+        end
+    end
 end
 
-fnames = dir([fdir '\l*']);
-fnames = {fnames.name};
-fnames = cell2mat(fnames');
-fnames = fdirsort(fnames);
-EPIDsf = zeros(384,512,length(fnames));
-for k=1:length(fnames)
-    disp(['f: ' num2str(k)]);
-    EPIDsf(:,:,k) = EPIDprep([fdir '\' fnames(k,:)]);
+% ** BIG F READ-IN **
+
+Fnames = dir([bigFPath '\w*']);
+
+numEpidValues = wLen * lLen;
+
+epidData_F = zeros(epidDims(2), epidDims(1), numEpidValues);
+
+for i=1:length(Fnames)
+    epidData_F(:,:,i) = EPIDprep([bigFPath '\' Fnames(i).name]);
 end
+
+d = 0;
+
+for l_i=1:1:lLen
+    l = l_s(l_i);
+    
+    for w_i=1:1:wLen
+        w = w_s(w_i);
+        
+        path = makePath(bigFPath, makeDataFolderName(l,w,d));
+        
+        fileNames = getDicomFileNames(path);
+        
+        if isempty(fileNames)
+            error(['No DICOM files found at: ', path]);
+        else
+            tpsValues(:,:,((w_i-1)*lLen)+l_i) = EPIDprep(path);
+        end
+    end
+end
+
+% ** SMALL f READ-IN **
+
+w = w_forShifts;
+
+dLen = length(d_s);
+
+numEpidValues = lLen * dLen;
+
+epidData_f = zeros(epidDims(2), epidDims(1), numEpidValues);
+
+for l_i=1:lLen
+    l = l_s(l_i);
+    
+    for d_i=1:dLen
+        d = d_s(d_i);
+        
+        path = makePath(smallFPath, makeDataFolderName(l,w,d));
+        
+        fileNames = getDicomFileNames(path);
+        
+        if isempty(fileNames)
+            error(['No DICOM files found at: ', path]);
+        else
+            tpsValues(:,:,((w_i-1)*wLen)+l_i) = EPIDprep(path);
+        end
+        
+        epidData_f(:,:,((l_i-1)*dLen)+d_i) = EPIDprep(path);
+    end
+end
+
 end
 

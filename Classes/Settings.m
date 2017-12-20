@@ -7,6 +7,10 @@ classdef Settings
         
         epidDicomDefaultPath = 'C:\'
         treatmentPlanningDefaultPath = 'C:\'
+                
+        doseGridScalingFieldName = 'DoseGridScaling'
+        centralAveragingWindowSideLength = 8
+        interpolationGridSpacingForCommissioningInCm = 0.1
     end
     
     properties (Constant)

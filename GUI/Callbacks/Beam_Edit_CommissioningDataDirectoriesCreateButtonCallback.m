@@ -8,8 +8,6 @@ energy = energy.createCommissioningDataDirectories();
 
 app.linacAndEpid.commissionedEnergyBeingEdited = energy;
 
-app.linacAndEpid = app.linacAndEpid.saveEnergyBeingEdited(app.linacAndEpidLoadPath);
-
 app.linacAndEpid.setSelectGUI(app);
 app.linacAndEpid.commissionedEnergyBeingEdited.setEditGUI(app);
 

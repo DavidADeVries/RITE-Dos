@@ -1,31 +1,31 @@
-function [ FMAT ] = makeBigF( ECLIPSEs, TPSdir, EPIDsF )
-%makeBigF Creates the F matrix.
-%   Detailed explanation goes here
+function mat_F = makeBigF(tpsValues, epidData_F, w_s, l_s, epidDims, settings)
+%mat_F = makeBigF(tpsValues, epidData_F, w_s, l_s, epidDims, settings)
 
-% Find the DICOM files within the TPS directory.
-TPSnames = dir([TPSdir '\w*.dcm']);
-TPSnames2 = {TPSnames.name};
-TPSnames2 = cell2mat(TPSnames2');
+wLen = length(w_s);
+lLen = length(l_s);
 
-% Determine the w's and l's used in the measurements.
-w_s = unique(str2num(TPSnames2(:,2:3))); %#ok<*ST2NM>
-l_s = unique(str2num(TPSnames2(:,5:6)));
+numTpsValues = wLen*lLen;
 
-%% Gets the dose maps from the treatment planning system data and takes the
+% Gets the dose maps from the treatment planning system data and takes the
 % center mean.
 % All of the files will have the same dose grid scaling and so just read
 % the first ones.
-TPSdose = zeros(1,length(TPSnames));
-for i=1:length(TPSnames)
-    TPSmap = ECLIPSEs(:,:,i);
-    TPSdose(i) = mean2(TPSmap(189:196,253:260));
+doseTps = zeros(1, numTpsValues);
+
+[crossPlaneWindow, inPlaneWindow] = getCentralAveragingWindow(epidDims, settings.centralAveragingWindowSideLength);
+
+for i=1:numTpsValues
+    TPSmap = tpsValues(:,:,i);
+    doseTps(i) = mean2(TPSmap(inPlaneWindow, crossPlaneWindow));
 end
-TPSdose = reshape(TPSdose,length(l_s),length(w_s))';
 
-%% Find the center mean of the signal.
-Svalues = mean(mean(EPIDsF(189:196,253:260,:)));
-Svalues = reshape(Svalues,length(l_s),length(w_s))';
+doseTps = reshape(doseTps, lLen, wLen)';
 
-%% F is then signal over dose.
-FMAT = Svalues ./ TPSdose;
+% Find the center mean of the signal.
+Svalues = mean(mean(epidData_F(inPlaneWindow, crossPlaneWindow, :)));
+Svalues = reshape(Svalues, lLen, wLen)';
+
+% F is then signal over dose.
+mat_F = Svalues ./ doseTps;
+
 end
