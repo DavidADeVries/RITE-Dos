@@ -1,18 +1,13 @@
-function [ws_in, ws_cr, DoseConvs, mat_HornCorr] = makeGaussianCorr(tpsValues, epidData_F, matInt_F, epidDims, l_s, w_s, settings)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+function [ws_in, ws_cr, DoseConvs, mat_HornCorr] = makeGaussianCorr(tpsValues, epidData_F, matInt_F, epidDims, epidDimsAtIso, l_s, w_s, settings)
+%[ws_in, ws_cr, DoseConvs, mat_HornCorr] = makeGaussianCorr(tpsValues, epidData_F, matInt_F, epidDims, epidDimsAtIso, l_s, w_s, settings)
 
-startingStDev = 1.7;
-
-stDevMultipliers = [1, 2, 10, 30];
+stDevs = settings.getGaussianCorrectionStDevs();
 numGaussians = length(stDevMultipliers);
-
-stDevs = startingStDev .* stDevMultipliers;
 
 x = 1:1000;
 m = (max(x)-min(x))/2+0.5;
 
-gaussians = gaussDistribution(x, m, stDevs/0.523);
+gaussians = gaussDistribution(x, m, stDevs / epidDimsAtIso(1));
 
 %Should horns be BSCed? If so, do this outside and pass EPIDs in after
 %having been corrected.
@@ -37,9 +32,9 @@ for i=1:size(epidData_F,3)
     Fwindex = round((WED_source2epid-ones(epidDims(2), epidDims(1))*(w_s(1)))/0.1)+1;
     Flindex = round((l-l_s(1))/0.1)+1;
     
-    F_map = matInt_F(Fwindex,Flindex);
-    F_map = reshape(F_map, epidDims(2), epidDims(1));
-    fmap = ones(epidDims(2), epidDims(1));
+    map_F = matInt_F(Fwindex,Flindex);
+    map_F = reshape(map_F, epidDims(2), epidDims(1));
+    map_f = ones(epidDims(2), epidDims(1));
     TMRratio = ones(epidDims(2), epidDims(1));
     
 %     % Adjusts the EPIDs for left-right and superior-inferior displacement.
@@ -53,28 +48,39 @@ for i=1:size(epidData_F,3)
 
     shiftEPIDsF = epidData_F(:,:,i);
     epid_elements = sort(shiftEPIDsF(:),'descend');
-    epid_64_max = mean(epid_elements(101:151));
-    epid_64_min = mean(epid_elements(end-150:end-100));
-    mask_epid = +(shiftEPIDsF>abs(epid_64_max+epid_64_min)/2);
+    
+    maxRange = ...
+        settings.epidShiftCalcNumOverOrUnderSaturatedPixels + 1:...
+        settings.epidShiftCalcNumOverOrUnderSaturatedPixels + settings.epidShiftCalcPixelRange + 1;
+    minRange = ...
+        length(epid_elements) - (settings.epidShiftCalcNumOverOrUnderSaturatedPixels + settings.epidShiftCalcPixelRange):...
+        length(epid_elements) - (settings.epidShiftCalcNumOverOrUnderSaturatedPixels);
+    
+    epidMax64 = mean(epid_elements(maxRange));
+    epidMin64 = mean(epid_elements(minRange));
+    maskEpid = +(shiftEPIDsF > abs(epidMax64 + epidMin64)/2);
     
     % In-plane gaussian
-    weightsInPlane = Fit2GaussConv(shiftEPIDsF(:,256)',tpsValues(:,256,i)', stDevs);
+    crossPlaneCentre = ceil(epidDims(1) / 2);
+    
+    weightsInPlane = Fit2GaussConv(shiftEPIDsF(:,crossPlaneCentre)',tpsValues(:,crossPlaneCentre,i)', stDevs, epidDimsAtIso, settings);
 
     ws_in(:,i) = weightsInPlane;
     
-    gsumin = (sum(weightsInPlane.*gaussians)/trapz(sum(weightsInPlane.*gaussians))); 
+    gSumInPlane = (sum(weightsInPlane.*gaussians)/trapz(sum(weightsInPlane.*gaussians))); 
         
     % Cross-plane gaussian
+    inPlaneCentre = ceil(epidDims(2) / 2);
     
-    weightsCrossPlane = Fit2GaussConv(shiftEPIDsF(192,:),tpsValues(192,:,i), stDevs);
+    weightsCrossPlane = Fit2GaussConv(shiftEPIDsF(inPlaneCentre,:),tpsValues(inPlaneCentre,:,i), stDevs, epidDimsAtIso, settings);
 
     ws_cr(:,i) = weightsCrossPlane;
     
-    gsumcr = (sum(weightsCrossPlane.*gaussians)/trapz(sum(weightsCrossPlane.*gaussians)));
+    gSumCrossPlane = (sum(weightsCrossPlane.*gaussians)/trapz(sum(weightsCrossPlane.*gaussians)));
 
     
     
-    DoseConv = getDoseConv(shiftEPIDsF,mask_epid,gsumcr,gsumin,TMRratio,F_map,fmap);
+    DoseConv = getDoseConv(shiftEPIDsF, maskEpid, gSumCrossPlane, gSumInPlane, TMRratio, map_F, map_f);
     DoseConvs(:,:,i) = DoseConv;
 
     

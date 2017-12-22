@@ -11,6 +11,16 @@ classdef Settings
         doseGridScalingFieldName = 'DoseGridScaling'
         centralAveragingWindowSideLength = 8
         interpolationGridSpacingForCommissioningInCm = 0.1
+        
+        % Gaussian Correction Parameters
+        startingStDev = 1.7
+        stDevMultipliers = [1, 2, 10, 30]
+        
+        epidShiftCalcNumOverOrUnderSaturatedPixels = 100
+        epidShiftCalcPixelRange = 50
+        
+        numTrialsForGaussianCorrection = 5
+        numIterationsForOptimization = 10000
     end
     
     properties (Constant)
@@ -47,6 +57,10 @@ classdef Settings
             
             app.Settings_EpidDicomPathEditField.Value = this.epidDicomDefaultPath;
             app.Settings_TpsDataPathEditField.Value = this.treatmentPlanningDefaultPath;
+        end
+        
+        function stDevs = getGaussianCorrectionStDevs(this)
+            stDevs = this.startingStDev .* this.stDevMultipliers;
         end
     end
     

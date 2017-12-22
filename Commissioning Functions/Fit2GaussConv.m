@@ -1,16 +1,27 @@
-function weightsEstimates = Fit2GaussConv(yData, ref, stDevs)
+function weightEstimates = Fit2GaussConv(yData, ref, stDevs, epidDimsAtIsoInCm, settings)
 % Call fminsearch with a random starting point.
-start_point = rand(1,4);
 
-model = @ConvSumGauss;
-optimizeFn = @(weights) model(weights, yData, ref, stDevs);
+numGaussians = length(stDevs);
 
-options = optimset('MaxFunEvals',10000,'MaxIter',10000);
+numTrials = settings.numTrialsForGaussianCorrection;
+estimates = zeros(numTrials, numGaussians);
 
-weightsEstimates = fminsearchbnd(optimizeFn, start_point, [0 0 0 0], [],options);
-weightsEstimates = weightsEstimates/sum(weightsEstimates);
+startPoints = rand(numTrials, numGaussians);
 
-% estimates = fminsearch(model, start_point, options);
+for i=1:numTrials        
+    model = @ConvSumGauss;
+    optimizeFn = @(weights) model(weights, yData, ref, stDevs, epidDimsAtIsoInCm(1));
+    
+    options = optimset('MaxFunEvals', settings.numIterationsForOptimization, 'MaxIter', settings.numIterationsForOptimization);
+    
+    trialEstimates = fminsearchbnd(optimizeFn, startPoints(i,:), [0 0 0 0], [], options);
+    trialEstimates = trialEstimates/sum(trialEstimates);
+    
+    estimates(i,:) = trialEstimates;
+end
+
+% average the trials
+weightEstimates = mean(estimates,1);
 
 end
 
@@ -21,14 +32,14 @@ end
 % and the TPS dose profile. FMINSEARCH only needs sse, but we want
 % to plot the FittedCurve at the end.
 
-function [sse, FittedCurve] = ConvSumGauss(weights, yData, ref, stDevs)
+function [sse, FittedCurve] = ConvSumGauss(weights, yData, ref, stDevs, epidDimAtIsoInCm)
 
 % MAKE GAUSSIANS
 
-x=1:1000;
-m=(max(x)-min(x))/2+0.5;
+x = 1:1000;
+m = (max(x)-min(x))/2+0.5;
 
-s = stDevs ./ 0.523;
+s = stDevs ./ epidDimAtIsoInCm;
 
 g = gaussDistribution(x, m, s);
 
@@ -60,10 +71,10 @@ slope = diff(ref);
 %   sse = sum(abs(ErrorVector([firstmax-2:firstmax+2,secondmax-2:secondmax+2])));
 %sse = sum(abs(ErrorVector([140:190])));
 %sse = sum(abs(ErrorVector(:)));
-a=index1;
+a = index1;
 % b=firstMax;
 % c=secondMax;
-d=index4;
+d = index4;
 %sse= sum(abs(ErrorVector([([a:b,c:d])])));
 %          sse= sum((ErrorVector([([a:b,c:d])])).^2);
 sse = sum(ErrorVector(a:d).^2);
