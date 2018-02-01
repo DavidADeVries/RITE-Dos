@@ -7,6 +7,10 @@ classdef Settings
         
         epidDicomDefaultPath = 'C:\'
         treatmentPlanningDefaultPath = 'C:\'
+        
+        patientCtDataDefaultPath = 'C:\'
+        patientEpidDataDefaultPath = 'C:\'
+        patientTpsDataDefaultPath = 'C:\'
                 
         doseGridScalingFieldName = 'DoseGridScaling'
         centralAveragingWindowSideLength = 8
@@ -21,6 +25,8 @@ classdef Settings
         
         numTrialsForGaussianCorrection = 5
         numIterationsForOptimization = 10000
+        
+        patientDoseCalculationAveragingWindowHalfLength = 4
     end
     
     properties (Constant)

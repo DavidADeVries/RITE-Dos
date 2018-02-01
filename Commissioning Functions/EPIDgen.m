@@ -43,7 +43,7 @@ numEpidValues = wLen * lLen;
 epidData_F = zeros(epidDims(2), epidDims(1), numEpidValues);
 
 for i=1:length(Fnames)
-    epidData_F(:,:,i) = EPIDprep([bigFPath '\' Fnames(i).name]);
+    epidData_F(:,:,i) = loadEpidData([bigFPath '\' Fnames(i).name], epidDims, settings.centralAveragingWindowSideLength);
 end
 
 d = 0;
@@ -61,7 +61,7 @@ for l_i=1:1:lLen
         if isempty(fileNames)
             error(['No DICOM files found at: ', path]);
         else
-            tpsValues(:,:,((w_i-1)*lLen)+l_i) = EPIDprep(path);
+            tpsValues(:,:,((w_i-1)*lLen)+l_i) = loadEpidData(path, epidDims, settings.centralAveragingWindowSideLength);
         end
     end
 end
@@ -89,10 +89,10 @@ for l_i=1:lLen
         if isempty(fileNames)
             error(['No DICOM files found at: ', path]);
         else
-            tpsValues(:,:,((w_i-1)*wLen)+l_i) = EPIDprep(path);
+            tpsValues(:,:,((w_i-1)*wLen)+l_i) = loadEpidData(path, epidDims, settings.centralAveragingWindowSideLength);
         end
         
-        epidData_f(:,:,((l_i-1)*dLen)+d_i) = EPIDprep(path);
+        epidData_f(:,:,((l_i-1)*dLen)+d_i) = loadEpidData(path, epidDims, settings.centralAveragingWindowSideLength);
     end
 end
 

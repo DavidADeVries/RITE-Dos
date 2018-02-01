@@ -7,7 +7,7 @@ numGaussians = length(stDevMultipliers);
 x = 1:1000;
 m = (max(x)-min(x))/2+0.5;
 
-gaussians = gaussDistribution(x, m, stDevs / epidDimsAtIso(1));
+gaussians = gaussDistribution(x, m, stDevs ./ epidDimsAtIso(1));
 
 %Should horns be BSCed? If so, do this outside and pass EPIDs in after
 %having been corrected.
@@ -15,7 +15,7 @@ mat_HornCorr = zeros(size(epidData_F));
 DoseConvs = zeros(size(epidData_F));
 
 ws_cr = zeros(numGaussians, size(epidData_F,3));
-ws_in = zeros(numGaussians ,size(epidData_F,3));
+ws_in = zeros(numGaussians, size(epidData_F,3));
 
 % [crossPlaneWindow, inPlaneWindow] = getCentralAveragingWindow(epidDims, settings.centralAveragingWindowSideLength);
 
@@ -47,18 +47,9 @@ for i=1:size(epidData_F,3)
        
 
     shiftEPIDsF = epidData_F(:,:,i);
-    epid_elements = sort(shiftEPIDsF(:),'descend');
     
-    maxRange = ...
-        settings.epidShiftCalcNumOverOrUnderSaturatedPixels + 1:...
-        settings.epidShiftCalcNumOverOrUnderSaturatedPixels + settings.epidShiftCalcPixelRange + 1;
-    minRange = ...
-        length(epid_elements) - (settings.epidShiftCalcNumOverOrUnderSaturatedPixels + settings.epidShiftCalcPixelRange):...
-        length(epid_elements) - (settings.epidShiftCalcNumOverOrUnderSaturatedPixels);
-    
-    epidMax64 = mean(epid_elements(maxRange));
-    epidMin64 = mean(epid_elements(minRange));
-    maskEpid = +(shiftEPIDsF > abs(epidMax64 + epidMin64)/2);
+    maskEpid = createMinMaxMask(shiftEPIDsF, settings);
+           
     
     % In-plane gaussian
     crossPlaneCentre = ceil(epidDims(1) / 2);

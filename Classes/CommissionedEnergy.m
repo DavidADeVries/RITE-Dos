@@ -29,7 +29,7 @@ classdef CommissionedEnergy
         matrix_f = []
         matrix_Tpr = []
         matrix_hornCorrection = []
-        gaussionWeights = []
+        gaussianWeights = []
     end
     
     methods
@@ -249,6 +249,7 @@ classdef CommissionedEnergy
             this.matrix_HornCorrection = mat_hornCorr;
             this.gaussianWeights = weights;            
         end
+        
     end
     
 end

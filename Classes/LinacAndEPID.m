@@ -190,7 +190,7 @@ classdef LinacAndEPID
         end
         
         function dimsInCm = getEpidPixelDimsAtIsoInCm(this)
-            dimsInCm = (this.sourceToIsocentreDistanceInCm / (this.sourceToIsocentreDistanceInCm + this.isocentreToEpidDistanceInCm)) * this.epidPixelDimsInCm;
+            dimsInCm = (this.sourceToIsocentreDistanceInCm ./ (this.sourceToIsocentreDistanceInCm + this.isocentreToEpidDistanceInCm)) .* this.epidPixelDimsInCm;
         end
     end
     
