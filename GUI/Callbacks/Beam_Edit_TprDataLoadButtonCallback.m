@@ -7,7 +7,7 @@ energy = energy.loadTissuePhantomRatioData();
 
 app.linacAndEpid.commissionedEnergyBeingEdited = energy;
 
-app.linacAndEpid.commissionedEnergyBeingEdited.setEditGUI();
+app.linacAndEpid.commissionedEnergyBeingEdited.setEditGUI(app);
 
 end
 

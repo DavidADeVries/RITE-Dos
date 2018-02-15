@@ -41,9 +41,9 @@ m = (max(x)-min(x))/2+0.5;
 
 s = stDevs ./ epidDimAtIsoInCm;
 
-g = gaussDistribution(x, m, s);
+gaussians = gaussDistribution(x, m, s);
 
-gSum=(sum(weights.*g))/trapz(sum(weights.*g));
+gSum = (sum(weights.*gaussians))/trapz(sum(weights.*gaussians));
 
 FittedCurve = conv(yData, gSum, 'same');
 % rescale FittedCurve so that is has approx the same value of TPS at the max of the TPS

@@ -1,7 +1,13 @@
-function [cancel, filePath] = getFilePath(title, defaultPath)
-%[cancel, filePath] = getFilePath(title, defaultPath)
+function [cancel, filePath] = getFilePath(title, defaultPath, varargin)
+%[cancel, filePath] = getFilePath(title, defaultPath, varargin)
 
-[filename, path] = uigetfile('*.mat', title, defaultPath);
+if isempty(varargin)
+    fileExt = '*.mat';
+else
+    fileExt = varargin{1};
+end
+
+[filename, path] = uigetfile(fileExt, title, defaultPath);
 
 if filename == 0 % cancelled
     cancel = true;

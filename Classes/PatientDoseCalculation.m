@@ -11,17 +11,17 @@ classdef PatientDoseCalculation
         numberOfFractions = 1
         
         % calculation results, available for recall
-        doseTps
-        doseTpsCentralAxisValue
+        doseTps = []
+        doseTpsCentralAxisValue = []
         
-        doseNoConvolution
-        doseNoConvolutionCentralAxisValue
+        doseNoConvolution = []
+        doseNoConvolutionCentralAxisValue = []
         
-        doseWithConvolution
-        doseWithConvolutionCentralAxisValue
+        doseWithConvolution = []
+        doseWithConvolutionCentralAxisValue = []
         
-        doseWithConvolutionAndHornCorrection
-        doseWithConvolutionAndHornCorrectionCentralAxisValue
+        doseWithConvolutionAndHornCorrection = []
+        doseWithConvolutionAndHornCorrectionCentralAxisValue = []
     end
     
     methods
@@ -48,6 +48,16 @@ classdef PatientDoseCalculation
             else
                 app.DoseCalc_CalculateButton.Enable = 'off';
             end
+            
+            % if dose calculation is finished, allow export and view
+            % buttons to be switched on
+            if this.isFinishedCalculation()
+                app.DoseCalc_ViewDoseMapsButton.Enable = 'on';
+                app.DoseCalc_ExportButton.Enable = 'on';
+            else
+                app.DoseCalc_ViewDoseMapsButton.Enable = 'off';
+                app.DoseCalc_ExportButton.Enable = 'off';
+            end
         end
         
         function this = createFromSelectGUI(this, app)
@@ -57,6 +67,18 @@ classdef PatientDoseCalculation
         
         function bool = isReadyForCalculation(this)
             bool = ~isempty(this.ctDataPath) && ~isempty(this.epidDataPath);
+        end
+        
+        function bool = isFinishedCalculation(this)
+            bool = ...
+                ~isempty(this.doseTps) &&...
+                ~isempty(this.doseTpsCentralAxisValue) &&...
+                ~isempty(this.doseNoConvolution) &&...
+                ~isempty(this.doseNoConvolutionCentralAxisValue) &&...
+                ~isempty(this.doseWithConvolution) &&...
+                ~isempty(this.doseWithConvolutionCentralAxisValue) &&...
+                ~isempty(this.doseWithConvolutionAndHornCorrection) &&...
+                ~isempty(this.doseWithConvolutionAndHornCorrectionCentralAxisValue);
         end
         
         function this = calculatePatientDose(this, ctSim, linacAndEpid, settings)
@@ -242,6 +264,62 @@ classdef PatientDoseCalculation
             
             this.doseWithConvolutionAndHornCorrection = patientDoseConvolutionWithHornCorrection;
             this.doseWithConvolutionAndHornCorrectionCentralAxisValue = convolutionWithHornCorrectionCentralAxisVal;
+        end
+        
+        function [] = showDoseMaps(this)
+            percent = 100;
+            
+            % Display No Convolution Result
+            figure;
+            imagesc((this.doseNoConvolution - dose.doseTps)./max(dose.doseTps(:))*percent);
+            title(['% dose diff relative to TPS max, NO CORR (CAX = ' num2str(this.doseNoConvolutionCentralAxisValue) ')']);
+            colorbar;
+            set(gca, 'CLim', [-5 5]);
+            colormap jet;
+            axis equal;
+            axis tight;
+            
+            % Display With Convolution Result
+            figure;
+            imagesc((this.doseWithConvolution - dose.doseTps)./max(dose.doseTps(:))*percent);
+            title(['% dose diff relative to TPS max, CONV CORR (CAX = ' num2str(this.doseWithConvolutionCentralAxisValue) ')']);
+            colorbar;
+            set(gca, 'CLim', [-5 5]);
+            colormap jet;
+            axis equal;
+            axis tight;
+            
+            % Display 
+            figure;
+            imagesc((this.doseWithConvolutionAndHornCorrection - dose.doseTps)./max(dose.doseTps(:))*percent);
+            title(['% dose diff relative to TPS max, CONV CORR with HCM (CAX = ' num2str(this.doseWithConvolutionAndHornCorrectionCentralAxisValue) ')']);
+            colorbar;
+            set(gca, 'CLim', [-5 5]);
+            colormap jet;
+            axis equal;
+            axis tight;            
+        end
+        
+        function [] = exportDoseMaps(this, filePath)
+            filePath = removeFileExtension(filePath);
+            
+            csvwrite(...
+                [filePath, Constants.TPS_CSV_LABEL, Constants.CSV_FILE_EXT],...
+                this.doseTps);
+                
+            csvwrite(...
+                [filePath, Constants.NO_CORRECTION_CSV_LABEL, Constants.CSV_FILE_EXT],...
+                this.doseNoConvolution);
+            
+            csvwrite(...
+                [filePath, Constants.GAUSSIAN_CORRECTION_CSV_LABEL, Constants.CSV_FILE_EXT],...
+                this.doseWithConvolution);
+                
+            csvwrite(...
+                [filePath, Constants.GAUSSIAN_AND_HORN_CORRECTION_CSV_LABEL, Constants.CSV_FILE_EXT],...
+                this.doseWithConvolutionAndHornCorrection);
+            
+            msgbox('Export Complete');
         end
     end
     

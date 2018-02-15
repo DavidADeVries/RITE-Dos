@@ -11,6 +11,8 @@ classdef Settings
         patientCtDataDefaultPath = 'C:\'
         patientEpidDataDefaultPath = 'C:\'
         patientTpsDataDefaultPath = 'C:\'
+        
+        patientDoseCalculationDefaultPath = 'C:\'
                 
         doseGridScalingFieldName = 'DoseGridScaling'
         centralAveragingWindowSideLength = 8

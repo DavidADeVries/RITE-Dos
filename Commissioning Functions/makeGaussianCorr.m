@@ -1,8 +1,8 @@
 function [ws_in, ws_cr, DoseConvs, mat_HornCorr] = makeGaussianCorr(tpsValues, epidData_F, matInt_F, epidDims, epidDimsAtIso, l_s, w_s, settings)
 %[ws_in, ws_cr, DoseConvs, mat_HornCorr] = makeGaussianCorr(tpsValues, epidData_F, matInt_F, epidDims, epidDimsAtIso, l_s, w_s, settings)
 
-stDevs = settings.getGaussianCorrectionStDevs();
-numGaussians = length(stDevMultipliers);
+stDevs = settings.startingStDev * settings.getGaussianCorrectionStDevs();
+numGaussians = length(stDevs);
 
 x = 1:1000;
 m = (max(x)-min(x))/2+0.5;

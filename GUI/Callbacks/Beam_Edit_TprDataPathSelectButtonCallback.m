@@ -3,7 +3,8 @@ function [] = Beam_Edit_TprDataPathSelectButtonCallback(app)
 
 [cancel, filePath] = getFilePath(...
     'Select TPR Data File...',...
-    app.settings.treatmentPlanningDefaultPath);
+    app.settings.treatmentPlanningDefaultPath,...
+    '*.csv');
 
 if ~cancel
     energy = app.linacAndEpid.commissionedEnergyBeingEdited;    

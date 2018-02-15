@@ -40,6 +40,16 @@ classdef Constants
         
         % FILE EXTENSIONS
         DICOM_FILE_EXT = '.dcm';
+        CSV_FILE_EXT = '.csv';
+        
+        % FILE FIELD NAMES
+        PATIENT_DOSE_CALCULATION_FIELD_NAME = 'patientDoseCalc';
+        
+        % CSV EXPORT LABEL
+        TPS_CSV_LABEL = 'TPS';
+        NO_CORRECTION_CSV_LABEL = 'No Corr.';
+        GAUSSIAN_CORRECTION_CSV_LABEL = 'Gaussian Corr.';
+        GAUSSIAN_AND_HORN_CORRECTION_CSV_LABEL = 'Gaussian + Horn Corr.';
     end
     
     methods
